@@ -100,9 +100,26 @@ erDiagram
         bigint id PK
         bigint unit_id FK
         varchar name UK
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    INVENTORY_LOCATIONS {
+        bigint id PK
+        varchar name UK
+        varchar description
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    INVENTORY_STOCKS {
+        bigint id PK
+        bigint inventory_item_id FK
+        bigint location_id FK
         decimal current_quantity
         decimal reorder_level
-        boolean is_active
         timestamp created_at
         timestamp updated_at
     }
@@ -155,7 +172,7 @@ erDiagram
 
     INVENTORY_TRANSACTIONS {
         bigint id PK
-        bigint inventory_item_id FK
+        bigint inventory_stock_id FK
         bigint supplier_id FK
         bigint recorded_by FK
 
@@ -298,6 +315,10 @@ erDiagram
 
     UNITS ||--o{ INVENTORY_ITEMS : measures
 
+    INVENTORY_ITEMS ||--o{ INVENTORY_STOCKS : has
+
+    INVENTORY_LOCATIONS ||--o{ INVENTORY_STOCKS : contains
+
 
     MENU_ITEMS ||--o{ RECIPE_ITEMS : has
 
@@ -313,7 +334,7 @@ erDiagram
 
     SUPPLIERS ||--o{ INVENTORY_TRANSACTIONS : provides
 
-    INVENTORY_ITEMS ||--o{ INVENTORY_TRANSACTIONS : records
+    INVENTORY_STOCKS ||--o{ INVENTORY_TRANSACTIONS : records
 
 
     ORDERS ||--o{ ORDER_ITEMS : contains
