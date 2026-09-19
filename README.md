@@ -352,3 +352,61 @@ erDiagram
 
     ORDERS ||--o{ PAYMENTS : has
 ```
+## System Process
+
+```mermaid
+flowchart TD
+
+    A[Supplier] --> B[Stock In]
+    B --> C[Inventory]
+
+    C --> D{Inventory Level}
+    D -->|Low Stock| E[Manager Reviews Stock]
+    E --> F[Restock]
+
+    G[Customer] --> H[Cashier Creates Order]
+
+    H --> I[Select Menu Item]
+    I --> J[Select Options]
+
+    J --> J1[Size]
+    J --> J2[Temperature]
+    J --> J3[Flavor]
+
+    J1 --> K[Calculate Order Price]
+    J2 --> K
+    J3 --> K
+
+    K --> L[Apply Discount if Applicable]
+    L --> M[Process Payment]
+
+    M --> M1[Cash]
+    M --> M2[GCash]
+
+    M1 --> N[Order Confirmed]
+    M2 --> N
+
+    N --> O[Send Order to Kitchen / Bar]
+
+    O --> P[Cook Receives Order]
+    P --> Q[Prepare Order]
+    Q --> R[Update Order Status]
+    R --> S[Order Ready]
+
+    S --> T[Calculate Recipe Usage]
+
+    T --> T1[Base Recipe]
+    T --> T2[Option Adjustments]
+
+    T1 --> U[Calculate Ingredients]
+    T2 --> U
+
+    U --> V[Deduct Inventory]
+    V --> W[Record Inventory Transaction]
+    W --> C
+
+    N --> X[Record Sale]
+    X --> Y[Dashboard / Sales Summary]
+
+    C --> Y
+```
