@@ -359,6 +359,7 @@ flowchart TD
 
     A[Supplier] --> B[Stock In]
     B --> C[Inventory]
+    C --> C1[Bar Area / Kitchen Area Stock]
 
     C --> D{Inventory Level}
     D -->|Low Stock| E[Manager Reviews Stock]
@@ -404,6 +405,10 @@ flowchart TD
     U --> V[Deduct Inventory]
     V --> W[Record Inventory Transaction]
     W --> C
+
+    N --> Z{Prepped Food?}
+    Z -->|Yes| Z1[Deduct 1 Serving / Unit]
+    Z1 --> W
 
     N --> X[Record Sale]
     X --> Y[Dashboard / Sales Summary]
