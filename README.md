@@ -352,6 +352,7 @@ erDiagram
 
     ORDERS ||--o{ PAYMENTS : has
 ```
+
 ## System Process
 
 ```mermaid
@@ -415,5 +416,9 @@ flowchart TD
 
     C --> Y
 ```
+
 ## UI DESIGN
-https://www.figma.com/design/gMAAZ9Zmgib7U5i35lr7Ni/The-Brewing-Bar-Wirefram?node-id=0-1&t=m43ypRmgkDD7Qbh2-1
+
+<a href="https://www.figma.com/design/gMAAZ9Zmgib7U5i35lr7Ni/The-Brewing-Bar-Wirefram?node-id=0-1&t=m43ypRmgkDD7Qbh2-1" target="_blank">
+See current UI interface
+</a>
