@@ -9,12 +9,22 @@ use App\Models\Option_Values;
 
 class Order_Item_Options extends Model
 {
+    protected $table = 'order_item_options';
+
+    protected $fillable = [
+        'order_item_id',
+        'option_value_id',
+        'price_adjustment',
+    ];
     public function orderItem(): BelongsTo
     {
         return $this->belongsTo(Order_Item::class);
     }
     public function optionValue(): BelongsTo
     {
-        return $this->belongsTo(Option_Values::class);
+        return $this->belongsTo(
+            Option_Values::class,
+            'option_value_id'
+        );
     }
 }

@@ -10,6 +10,14 @@ use App\Models\Inventory_Item;
 
 class Menu_Option_Recipe_Adjustments extends Model
 {
+    protected $table = 'menu_option_recipe_adjustments';
+
+    protected $fillable = [
+        'menu_item_id',
+        'option_value_id',
+        'inventory_item_id',
+        'quantity_adjustment',
+    ];
     public function menuItem(): BelongsTo
     {
         return $this->belongsTo(Menu_Items::class);

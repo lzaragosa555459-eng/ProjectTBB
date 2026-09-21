@@ -12,6 +12,19 @@ use App\Models\Payment;
 
 class Order extends Model
 {
+    protected $table = 'orders';
+
+    protected $fillable = [
+        'cashier_id',
+        'order_number',
+        'order_type',
+        'status',
+        'subtotal',
+        'discount_amount',
+        'total_amount',
+        'ordered_at',
+        'completed_at',
+    ];
     public function cashier(): BelongsTo
     {
         return $this->belongsTo(User::class, 'cashier_id');

@@ -13,13 +13,27 @@ use App\Models\Kitchen_Order_Item;
 
 class Order_Item extends Model
 {
+
+    protected $table = 'order_items';
+
+    protected $fillable = [
+        'order_id',
+        'menu_item_id',
+        'quantity',
+        'unit_price',
+        'subtotal',
+        'notes',
+    ];
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
     public function menuItem(): BelongsTo
     {
-        return $this->belongsTo(Menu_Items::class);
+        return $this->belongsTo(
+            Menu_Items::class,
+            'menu_item_id'
+        );
     }
     public function orderItemOptions(): HasMany
     {
@@ -28,5 +42,13 @@ class Order_Item extends Model
     public function kitchenOrderItem(): HasOne
     {
         return $this->hasOne(Kitchen_Order_Item::class);
+    }
+
+    public function options(): HasMany
+    {
+        return $this->hasMany(
+            Order_Item_Options::class,
+            'order_item_id'
+        );
     }
 }

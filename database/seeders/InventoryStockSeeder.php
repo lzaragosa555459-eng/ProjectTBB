@@ -85,10 +85,12 @@ class InventoryStockSeeder extends Seeder
         foreach ($barItems as $itemName) {
             $item = Inventory_Item::where('name', $itemName)->first();
 
+            $quantity = $itemName === 'Vanilla' ? 10 : 0;
+
             Inventory_Stock::create([
                 'inventory_item_id' => $item->id,
                 'location_id' => $bar->id,
-                'current_quantity' => 0,
+                'current_quantity' => $quantity,
                 'reorder_level' => 0,
             ]);
         }

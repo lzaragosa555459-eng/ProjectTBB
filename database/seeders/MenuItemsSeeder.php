@@ -51,5 +51,32 @@ class MenuItemsSeeder extends Seeder
             'description' => 'Pork adobo.',
             'is_active' => true,
         ]);
+
+        $coffee = Category::where('name', 'Coffee')->first();
+        $nonCoffee = Category::where('name', 'Non-Coffee')->first();
+
+        Menu_Items::create([
+            'category_id' => $coffee->id,
+            'name' => 'Latte',
+            'base_price' => 110,
+            'description' => 'Coffee-based latte.',
+            'is_active' => true,
+        ]);
+
+        Menu_Items::create([
+            'category_id' => $coffee->id,
+            'name' => 'Caramel Latte',
+            'base_price' => 120,
+            'description' => 'Latte with caramel flavor.',
+            'is_active' => true,
+        ]);
+
+        Menu_Items::create([
+            'category_id' => $nonCoffee->id,
+            'name' => 'Matcha Latte',
+            'base_price' => 120,
+            'description' => 'Matcha-based latte.',
+            'is_active' => true,
+        ]);
     }
 }

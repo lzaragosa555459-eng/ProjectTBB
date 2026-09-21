@@ -28,12 +28,19 @@ class Menu_Items extends Model
 
     public function recipeItems(): HasMany
     {
-        return $this->hasMany(Recipe_Items::class);
+        return $this->hasMany(
+            Recipe_Items::class,
+            'menu_item_id',
+            'id'
+        );
     }
 
-    public function optionRecipeAdjustments(): HasMany
+    public function recipeAdjustments(): HasMany
     {
-        return $this->hasMany(Menu_Option_Recipe_Adjustments::class);
+        return $this->hasMany(
+            Menu_Option_Recipe_Adjustments::class,
+            'menu_item_id'
+        );
     }
     public function orderItems(): HasMany
     {

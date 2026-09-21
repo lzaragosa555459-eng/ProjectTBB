@@ -3,16 +3,31 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use App\Models\Option_Groups;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Menu_Item_Option_Groups extends Model
 {
-    public function optionGroups(): BelongsToMany
+    protected $table = 'menu_item_option_groups';
+
+    protected $fillable = [
+        'menu_item_id',
+        'option_group_id',
+        'is_required',
+    ];
+
+    public function menuItem(): BelongsTo
     {
-        return $this->belongsToMany(
+        return $this->belongsTo(
+            Menu_Items::class,
+            'menu_item_id'
+        );
+    }
+
+    public function optionGroup(): BelongsTo
+    {
+        return $this->belongsTo(
             Option_Groups::class,
-            'menu_item_option_groups'
-        )->withPivot('is_required');
+            'option_group_id'
+        );
     }
 }
