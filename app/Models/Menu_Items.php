@@ -11,6 +11,8 @@ use App\Models\Order_Item;
 
 class Menu_Items extends Model
 {
+    protected $table = 'menu_items';
+
     protected $fillable = [
         'category_id',
         'name',

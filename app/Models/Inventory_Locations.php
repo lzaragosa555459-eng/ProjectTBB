@@ -8,6 +8,8 @@ use App\Models\Inventory_Stock;
 
 class Inventory_Locations extends Model
 {
+    protected $table = 'inventory_locations';
+
     public function inventoryStocks(): HasMany
     {
         return $this->hasMany(Inventory_Stock::class);

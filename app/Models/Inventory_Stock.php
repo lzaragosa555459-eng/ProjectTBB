@@ -11,6 +11,16 @@ use App\Models\Inventory_Transactions;
 
 class Inventory_Stock extends Model
 {
+
+    protected $table = 'inventory_stocks';
+
+    protected $fillable = [
+        'inventory_item_id',
+        'location_id',
+        'current_quantity',
+        'reorder_level',
+    ];
+
     public function inventoryItem(): BelongsTo
     {
         return $this->belongsTo(Inventory_Item::class);

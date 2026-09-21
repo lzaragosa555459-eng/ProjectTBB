@@ -10,6 +10,8 @@ use App\Models\Menu_Items;
 
 class Option_Groups extends Model
 {
+    protected $table = 'option_groups';
+
     protected $fillable = [
         'name',
         'description',

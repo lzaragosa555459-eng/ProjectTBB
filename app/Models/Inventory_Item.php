@@ -12,6 +12,15 @@ use App\Models\Menu_Option_Recipe_Adjustments;
 
 class Inventory_Item extends Model
 {
+    protected $table = 'inventory_items';
+
+    protected $fillable = [
+        'unit_id',
+        'name',
+        'inventory_type',
+        'is_active',
+    ];
+
     public function unit(): BelongsTo
     {
         return $this->belongsTo(Unit::class);

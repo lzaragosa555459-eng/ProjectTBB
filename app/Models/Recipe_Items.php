@@ -9,6 +9,14 @@ use App\Models\Inventory_Item;
 
 class Recipe_Items extends Model
 {
+    protected $table = 'recipe_items';
+
+    protected $fillable = [
+        'menu_item_id',
+        'inventory_item_id',
+        'quantity_required',
+    ];
+
     public function menuItem(): BelongsTo
     {
         return $this->belongsTo(Menu_Items::class);

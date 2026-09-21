@@ -11,6 +11,8 @@ use App\Models\Order_Item_Options;
 
 class Option_Values extends Model
 {
+    protected $table = 'option_values';
+
     protected $fillable = [
         'option_group_id',
         'name',

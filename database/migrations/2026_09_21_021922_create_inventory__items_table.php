@@ -6,25 +6,30 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('inventory_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('unit_id')->constrained('units');
+
+            $table->foreignId('unit_id')
+                ->nullable()
+                ->constrained('units');
+
             $table->string('name')->unique();
+
+            $table->enum('inventory_type', [
+                'Prepped Food',
+                'Ingredient',
+            ]);
+
             $table->boolean('is_active')->default(true);
+
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('inventory__items');
+        Schema::dropIfExists('inventory_items');
     }
 };
