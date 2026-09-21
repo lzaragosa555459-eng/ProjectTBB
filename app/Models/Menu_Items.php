@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Recipe_Items;
 use App\Models\Menu_Option_Recipe_Adjustments;
 use App\Models\Order_Item;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Menu_Items extends Model
 {
@@ -45,5 +46,15 @@ class Menu_Items extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(Order_Item::class);
+    }
+    public function optionGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Option_Groups::class,
+            'menu_item_option_groups',
+            'menu_item_id',
+            'option_group_id'
+        )
+            ->withPivot('is_required');
     }
 }

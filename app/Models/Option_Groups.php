@@ -19,9 +19,12 @@ class Option_Groups extends Model
 
     public function optionValues(): HasMany
     {
-        return $this->hasMany(Option_Values::class);
+        return $this->hasMany(
+            Option_Values::class,
+            'option_group_id',
+            'id'
+        );
     }
-
     public function menuItems(): BelongsToMany
     {
         return $this->belongsToMany(

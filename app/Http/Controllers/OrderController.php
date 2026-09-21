@@ -9,6 +9,10 @@ use App\Models\Option_Values;
 use App\Models\Order_Item;
 use App\Models\Order_Item_Options;
 use App\Models\Kitchen_Order_Item;
+use App\Models\Payment;
+use App\Services\InventoryService;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -31,112 +35,153 @@ class OrderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, InventoryService $inventoryService)
     {
-        $validated = $request->validate([
-            'cashier_id' => 'required|exists:users,id',
-            'order_type' => 'required|string|max:50',
-            'items' => 'required|array|min:1',
+        return DB::transaction(function () use ($request, $inventoryService) {
+            $validated = $request->validate([
+                'cashier_id' => 'required|exists:users,id',
+                'order_type' => 'required|string|max:50',
+                'items' => 'required|array|min:1',
 
-            'items.*.menu_item_id' => 'required|exists:menu_items,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.notes' => 'nullable|string',
+                'items.*.menu_item_id' => 'required|exists:menu_items,id',
+                'items.*.quantity' => 'required|integer|min:1',
+                'items.*.notes' => 'nullable|string',
 
-            'items.*.options' => 'nullable|array',
-            'items.*.options.*' => 'exists:option_values,id',
-        ]);
-        $subtotal = 0;
+                'items.*.options' => 'nullable|array',
+                'items.*.options.*' => 'exists:option_values,id',
 
-        foreach ($validated['items'] as $item) {
+                'payment_method' => 'required|in:Cash,GCash',
+                'amount_received' => 'required|numeric|min:0',
+                'reference_number' => 'nullable|string|max:100',
+                'proof_path' => 'nullable|string|max:255',
+            ]);
+            $subtotal = 0;
 
-            $menuItem = Menu_Items::findOrFail(
-                $item['menu_item_id']
-            );
+            foreach ($validated['items'] as $item) {
 
-            $itemPrice = $menuItem->base_price;
+                $menuItem = Menu_Items::findOrFail(
+                    $item['menu_item_id']
+                );
 
-            if (!empty($item['options'])) {
-                foreach ($item['options'] as $optionId) {
+                $itemPrice = $menuItem->base_price;
 
-                    $option = Option_Values::findOrFail($optionId);
+                if (!empty($item['options'])) {
+                    foreach ($item['options'] as $optionId) {
 
-                    $itemPrice += $option->price_adjustment;
+                        $option = Option_Values::findOrFail($optionId);
+
+                        $itemPrice += $option->price_adjustment;
+                    }
                 }
+
+                $subtotal += $itemPrice * $item['quantity'];
             }
 
-            $subtotal += $itemPrice * $item['quantity'];
-        }
+            $discountAmount = 0;
 
-        $discountAmount = 0;
+            $totalAmount = $subtotal - $discountAmount;
+            if ($validated['amount_received'] < $totalAmount) {
+                return response()->json([
+                    'message' => 'Payment amount is insufficient.',
+                ], 422);
+            }
+            $validated['subtotal'] = $subtotal;
+            $validated['discount_amount'] = $discountAmount;
+            $validated['total_amount'] = $totalAmount;
 
-        $totalAmount = $subtotal - $discountAmount;
-        $validated['subtotal'] = $subtotal;
-        $validated['discount_amount'] = $discountAmount;
-        $validated['total_amount'] = $totalAmount;
-
-        $validated['order_number'] = 'ORD-' . str_pad(
-            Order::count() + 1,
-            4,
-            '0',
-            STR_PAD_LEFT
-        );
-
-        $validated['status'] = 'Pending';
-        $validated['ordered_at'] = now();
-        $validated['completed_at'] = null;
-
-        $order = Order::create($validated);
-        foreach ($validated['items'] as $item) {
-
-            $menuItem = Menu_Items::findOrFail(
-                $item['menu_item_id']
+            $validated['order_number'] = 'ORD-' . str_pad(
+                Order::count() + 1,
+                4,
+                '0',
+                STR_PAD_LEFT
             );
 
-            $itemPrice = $menuItem->base_price;
+            $validated['status'] = 'Pending';
+            $validated['ordered_at'] = now();
+            $validated['completed_at'] = null;
 
-            if (!empty($item['options'])) {
-                foreach ($item['options'] as $optionId) {
+            $order = Order::create([
+                'cashier_id' => $validated['cashier_id'],
+                'order_number' => $validated['order_number'],
+                'order_type' => $validated['order_type'],
+                'status' => $validated['status'],
+                'subtotal' => $validated['subtotal'],
+                'discount_amount' => $validated['discount_amount'],
+                'total_amount' => $validated['total_amount'],
+                'ordered_at' => $validated['ordered_at'],
+                'completed_at' => $validated['completed_at'],
+            ]);
+            foreach ($validated['items'] as $item) {
 
-                    $option = Option_Values::findOrFail($optionId);
+                $menuItem = Menu_Items::findOrFail(
+                    $item['menu_item_id']
+                );
 
-                    $itemPrice += $option->price_adjustment;
+                $itemPrice = $menuItem->base_price;
+
+                if (!empty($item['options'])) {
+                    foreach ($item['options'] as $optionId) {
+
+                        $option = Option_Values::findOrFail($optionId);
+
+                        $itemPrice += $option->price_adjustment;
+                    }
                 }
-            }
 
-            $orderItem = Order_Item::create([
+                $orderItem = Order_Item::create([
+                    'order_id' => $order->id,
+                    'menu_item_id' => $menuItem->id,
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $itemPrice,
+                    'subtotal' => $itemPrice * $item['quantity'],
+                    'notes' => $item['notes'] ?? null,
+                ]);
+
+                if (!empty($item['options'])) {
+
+                    foreach ($item['options'] as $optionId) {
+
+                        $option = Option_Values::findOrFail($optionId);
+
+                        Order_Item_Options::create([
+                            'order_item_id' => $orderItem->id,
+                            'option_value_id' => $option->id,
+                            'price_adjustment' => $option->price_adjustment,
+                        ]);
+                    }
+                }
+                Kitchen_Order_Item::create([
+                    'order_item_id' => $orderItem->id,
+                    'prepared_by' => null,
+                    'status' => 'Pending',
+                    'started_at' => null,
+                    'completed_at' => null,
+                ]);
+            }
+            $changeAmount = $validated['amount_received'] - $totalAmount;
+
+            Payment::create([
                 'order_id' => $order->id,
-                'menu_item_id' => $menuItem->id,
-                'quantity' => $item['quantity'],
-                'unit_price' => $itemPrice,
-                'subtotal' => $itemPrice * $item['quantity'],
-                'notes' => $item['notes'] ?? null,
+                'received_by' => $validated['cashier_id'],
+                'payment_method' => $validated['payment_method'],
+                'amount' => $totalAmount,
+                'amount_received' => $validated['amount_received'],
+                'change_amount' => $changeAmount,
+                'reference_number' => $validated['reference_number'] ?? null,
+                'proof_path' => $validated['proof_path'] ?? null,
+                'paid_at' => now(),
             ]);
 
-            if (!empty($item['options'])) {
+            $inventoryService->deductForOrder(
+                $order->load('orderItems.menuItem.recipeItems', 'orderItems.options'),
+                User::findOrFail($validated['cashier_id'])
+            );
 
-                foreach ($item['options'] as $optionId) {
-
-                    $option = Option_Values::findOrFail($optionId);
-
-                    Order_Item_Options::create([
-                        'order_item_id' => $orderItem->id,
-                        'option_value_id' => $option->id,
-                        'price_adjustment' => $option->price_adjustment,
-                    ]);
-                }
-            }
-            Kitchen_Order_Item::create([
-                'order_item_id' => $orderItem->id,
-                'prepared_by' => null,
-                'status' => 'Pending',
-                'started_at' => null,
-                'completed_at' => null,
-            ]);
-        }
-        return response()->json([
-            'message' => 'Order created successfully.',
-            'order' => $order,
-        ], 201);
+            return response()->json([
+                'message' => 'Order created successfully.',
+                'order' => $order,
+            ], 201);
+        });
     }
 
     /**

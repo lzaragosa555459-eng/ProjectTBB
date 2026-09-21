@@ -41,7 +41,11 @@ class Order_Item extends Model
     }
     public function kitchenOrderItem(): HasOne
     {
-        return $this->hasOne(Kitchen_Order_Item::class);
+        return $this->hasOne(
+            Kitchen_Order_Item::class,
+            'order_item_id',
+            'id'
+        );
     }
 
     public function options(): HasMany
