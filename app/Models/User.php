@@ -7,6 +7,12 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Inventory_Transactions;
+use App\Models\Order;
+use App\Models\Kitchen_Order_Item;
+use App\Models\Payment;
 
 class User extends Authenticatable
 {
@@ -45,5 +51,27 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function inventoryTransactions(): HasMany
+    {
+        return $this->hasMany(Inventory_Transactions::class, 'recorded_by');
+    }
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'cashier_id');
+    }
+    public function kitchenOrderItems(): HasMany
+    {
+        return $this->hasMany(Kitchen_Order_Item::class, 'prepared_by');
+    }
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'received_by');
     }
 }
