@@ -187,6 +187,27 @@
             background: #222;
             color: white;
         }
+
+        @media (max-width: 900px) {
+
+            .pos-container {
+                flex-direction: column;
+            }
+
+            .menu-section,
+            .cart-section {
+                width: 100%;
+            }
+
+            .cart-section {
+                margin-top: 20px;
+            }
+
+            .menu-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
     </style>
 </head>
 
@@ -263,6 +284,7 @@
                 </div>
                 <button
                     type="button"
+                    class="checkout-button"
                     onclick="openCheckoutModal()">
                     Checkout
                 </button>
@@ -545,10 +567,10 @@
             if (cart.length === 0) {
 
                 cartItems.innerHTML = `
-                <div class="empty-cart">
-                    No items added.
-                </div>
-            `;
+            <div class="empty-cart">
+                No items added.
+            </div>
+        `;
 
                 document.getElementById('subtotal').textContent =
                     '₱0.00';
@@ -563,53 +585,134 @@
 
             cartItems.innerHTML = '';
 
-            cart.forEach(item => {
+            cart.forEach((item, index) => {
 
                 const itemSubtotal =
                     item.price * item.quantity;
 
                 subtotal += itemSubtotal;
 
+                const optionText =
+                    item.options && item.options.length > 0 ?
+                    item.options.map(option => option.name).join(', ') :
+                    '';
+
                 cartItems.innerHTML += `
+            <div style="
+                padding: 14px 0;
+                border-bottom: 1px solid #eee;
+            ">
+
                 <div style="
-                    padding: 12px 0;
-                    border-bottom: 1px solid #eee;
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 10px;
+                ">
+
+                    <strong>
+                        ${item.name}
+                    </strong>
+
+                    <strong>
+                        ₱${itemSubtotal.toFixed(2)}
+                    </strong>
+
+                </div>
+
+                ${
+                    optionText
+                        ? `
+                            <div style="
+                                margin-top: 5px;
+                                color: #777;
+                                font-size: 14px;
+                            ">
+                                ${optionText}
+                            </div>
+                        `
+                        : ''
+                }
+
+                <div style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-top: 10px;
                 ">
 
                     <div style="
                         display: flex;
-                        justify-content: space-between;
+                        align-items: center;
+                        gap: 8px;
                     ">
 
-                        <strong>${item.name}</strong>
+                        <button
+                            type="button"
+                            onclick="decreaseQuantity(${index})"
+                            style="
+                                width: 32px;
+                                height: 32px;
+                                border: 1px solid #ddd;
+                                background: white;
+                                border-radius: 6px;
+                                cursor: pointer;
+                                font-size: 18px;
+                            "
+                        >
+                            −
+                        </button>
 
-                        <span>
-                            ₱${itemSubtotal.toFixed(2)}
+                        <span style="
+                            min-width: 24px;
+                            text-align: center;
+                            font-weight: bold;
+                        ">
+                            ${item.quantity}
                         </span>
 
+                        <button
+                            type="button"
+                            onclick="increaseQuantity(${index})"
+                            style="
+                                width: 32px;
+                                height: 32px;
+                                border: 1px solid #ddd;
+                                background: white;
+                                border-radius: 6px;
+                                cursor: pointer;
+                                font-size: 18px;
+                            "
+                        >
+                            +
+                        </button>
+
                     </div>
 
-                    <div style="
-                        margin-top: 5px;
-                        color: #777;
-                    ">
-                        ${
-                            item.options && item.options.length > 0
-                                ? item.options.map(option => option.name).join(', ')
-                                : ''
-                        }
-                    </div>
-
-                    <div style="
-                        margin-top: 5px;
-                        color: #777;
-                    ">
-                        ${item.quantity} ×
-                        ₱${item.price.toFixed(2)}
-                    </div>
+                    <button
+                        type="button"
+                        onclick="removeCartItem(${index})"
+                        style="
+                            border: none;
+                            background: none;
+                            color: #c00;
+                            cursor: pointer;
+                        "
+                    >
+                        Remove
+                    </button>
 
                 </div>
-            `;
+
+                <div style="
+                    margin-top: 6px;
+                    color: #777;
+                    font-size: 13px;
+                ">
+                    ₱${item.price.toFixed(2)} each
+                </div>
+
+            </div>
+        `;
 
             });
 
@@ -620,6 +723,36 @@
                 `₱${subtotal.toFixed(2)}`;
         }
 
+        function increaseQuantity(index) {
+
+            cart[index].quantity++;
+
+            renderCart();
+        }
+
+
+        function decreaseQuantity(index) {
+
+            if (cart[index].quantity > 1) {
+
+                cart[index].quantity--;
+
+            } else {
+
+                cart.splice(index, 1);
+
+            }
+
+            renderCart();
+        }
+
+
+        function removeCartItem(index) {
+
+            cart.splice(index, 1);
+
+            renderCart();
+        }
 
         function openOptionModal(menuItem) {
 
@@ -782,69 +915,101 @@
                 ).textContent =
                 `₱${subtotal.toFixed(2)}`;
 
+
+            // Reset payment fields
+
+            document.getElementById(
+                'amountReceived'
+            ).value = '';
+
+            document.getElementById(
+                'changeAmount'
+            ).textContent = '₱0.00';
+
+            document.getElementById(
+                'gcashReference'
+            ).value = '';
+
+
+            // Default to Cash
+
+            document.querySelector(
+                'input[name="payment_method"][value="Cash"]'
+            ).checked = true;
+
+            document.getElementById(
+                'cashPaymentFields'
+            ).style.display = 'block';
+
+            document.getElementById(
+                'gcashPaymentFields'
+            ).style.display = 'none';
+
+
             document.getElementById(
                 'checkoutModal'
             ).style.display = 'flex';
-            document
-                .querySelectorAll('input[name="payment_method"]')
-                .forEach(radio => {
-
-                    radio.addEventListener('change', function() {
-
-                        const cashFields =
-                            document.getElementById(
-                                'cashPaymentFields'
-                            );
-
-                        const gcashFields =
-                            document.getElementById(
-                                'gcashPaymentFields'
-                            );
-
-                        if (this.value === 'Cash') {
-
-                            cashFields.style.display = 'block';
-                            gcashFields.style.display = 'none';
-
-                        } else {
-
-                            cashFields.style.display = 'none';
-                            gcashFields.style.display = 'block';
-
-                        }
-
-                    });
-
-                });
-            document
-                .getElementById('amountReceived')
-                .addEventListener('input', function() {
-
-                    const totalText =
-                        document.getElementById(
-                            'checkoutTotal'
-                        ).textContent;
-
-                    const total =
-                        parseFloat(
-                            totalText.replace('₱', '')
-                        ) || 0;
-
-                    const received =
-                        parseFloat(this.value) || 0;
-
-                    const change =
-                        received - total;
-
-                    document.getElementById(
-                            'changeAmount'
-                        ).textContent =
-                        `₱${Math.max(change, 0).toFixed(2)}`;
-
-                });
         }
 
+        document
+            .querySelectorAll('input[name="payment_method"]')
+            .forEach(radio => {
 
+                radio.addEventListener('change', function() {
+
+                    const cashFields =
+                        document.getElementById(
+                            'cashPaymentFields'
+                        );
+
+                    const gcashFields =
+                        document.getElementById(
+                            'gcashPaymentFields'
+                        );
+
+                    if (this.value === 'Cash') {
+
+                        cashFields.style.display = 'block';
+                        gcashFields.style.display = 'none';
+
+                    } else {
+
+                        cashFields.style.display = 'none';
+                        gcashFields.style.display = 'block';
+
+                    }
+
+                });
+
+            });
+
+
+        document
+            .getElementById('amountReceived')
+            .addEventListener('input', function() {
+
+                const totalText =
+                    document.getElementById(
+                        'checkoutTotal'
+                    ).textContent;
+
+                const total =
+                    parseFloat(
+                        totalText.replace('₱', '')
+                    ) || 0;
+
+                const received =
+                    parseFloat(this.value) || 0;
+
+                const change =
+                    received - total;
+
+                document.getElementById(
+                        'changeAmount'
+                    ).textContent =
+                    `₱${Math.max(change, 0).toFixed(2)}`;
+
+            });
 
         function closeCheckoutModal() {
 
@@ -870,6 +1035,16 @@
                     'input[name="payment_method"]:checked'
                 ).value;
 
+            const totalText =
+                document.getElementById(
+                    'checkoutTotal'
+                ).textContent;
+
+            const total =
+                parseFloat(
+                    totalText.replace('₱', '')
+                ) || 0;
+
             const amountReceived =
                 parseFloat(
                     document.getElementById(
@@ -882,18 +1057,45 @@
                     'gcashReference'
                 ).value.trim();
 
+
+            // Cash validation
+            if (paymentMethod === 'Cash') {
+
+                if (amountReceived < total) {
+
+                    alert(
+                        'Amount received is not enough.'
+                    );
+
+                    return;
+                }
+
+            }
+
+
+            // GCash validation
+            if (paymentMethod === 'GCash') {
+
+                if (!/^\d{4}$/.test(gcashReference)) {
+
+                    alert(
+                        'GCash reference number must be exactly 4 digits.'
+                    );
+
+                    return;
+                }
+
+            }
+
+
             const items = cart.map(item => ({
-
                 menu_item_id: item.id,
-
                 quantity: item.quantity,
-
                 notes: null,
-
                 options: item.options ?
                     item.options.map(option => option.id) : []
-
             }));
+
 
             const data = {
 
@@ -911,7 +1113,9 @@
                     gcashReference : null,
 
                 proof_path: null
+
             };
+
 
             try {
 
@@ -921,9 +1125,7 @@
 
                         headers: {
                             'Content-Type': 'application/json',
-
                             'Accept': 'application/json',
-
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                         },
 
@@ -931,8 +1133,10 @@
                     }
                 );
 
+
                 const result =
                     await response.json();
+
 
                 if (!response.ok) {
 
@@ -946,15 +1150,18 @@
                     return;
                 }
 
+
                 alert(
                     `Order ${result.order.order_number} created successfully.`
                 );
+
 
                 cart = [];
 
                 renderCart();
 
                 closeCheckoutModal();
+
 
             } catch (error) {
 
@@ -963,7 +1170,9 @@
                 alert(
                     'Something went wrong while creating the order.'
                 );
+
             }
+
         }
     </script>
 </body>
