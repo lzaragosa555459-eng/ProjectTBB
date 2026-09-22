@@ -1,12 +1,13 @@
 <?php
 
+use App\Http\Controllers\KitchenOrderItemController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\POSController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::get('/dashboard', function () {
@@ -22,6 +23,26 @@ Route::middleware('auth')->group(function () {
 Route::post('/orders', [OrderController::class, 'store']);
 Route::get('/test-order', function () {
     return view('test-order');
-});
-Route::get('/pos', [POSController::class, 'index']);
+})->middleware('auth');
+
+Route::get('/kitchen', [KitchenOrderItemController::class, 'index'])->middleware('auth');
+
+Route::post(
+    '/kitchen/{kitchenOrder}/start',
+    [KitchenOrderItemController::class, 'start']
+)->middleware(['auth', 'cook']);
+
+Route::post(
+    '/kitchen/{kitchenOrder}/complete',
+    [KitchenOrderItemController::class, 'complete']
+)->middleware(['auth', 'cook']);
+
+Route::post(
+    '/orders/{order}/complete',
+    [OrderController::class, 'completeOrder']
+)->middleware(['auth', 'cook']);
+
+Route::get('/pos', [POSController::class, 'index'])->middleware('auth');
+
+
 require __DIR__ . '/auth.php';

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('status')->default('pending');
             $table->decimal('subtotal', 10, 2);
             $table->decimal('discount_amount', 10, 2)->default(0);
+            $table->string('discount_type')->default('None');
             $table->decimal('total_amount', 10, 2);
             $table->timestamp('ordered_at');
             $table->timestamp('completed_at')->nullable();

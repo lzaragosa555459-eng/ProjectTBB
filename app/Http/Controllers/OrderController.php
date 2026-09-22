@@ -37,9 +37,11 @@ class OrderController extends Controller
      */
     public function store(Request $request, InventoryService $inventoryService)
     {
-        return DB::transaction(function () use ($request, $inventoryService) {
+        $cashier = auth()->user();
+
+        return DB::transaction(function () use ($request, $inventoryService, $cashier) {
             $validated = $request->validate([
-                'cashier_id' => 'required|exists:users,id',
+                'cashier_id' => 'nullable|exists:users,id',
                 'order_type' => 'required|string|max:50',
                 'items' => 'required|array|min:1',
 
@@ -50,8 +52,10 @@ class OrderController extends Controller
                 'items.*.options' => 'nullable|array',
                 'items.*.options.*' => 'exists:option_values,id',
 
+                'discount_type' => 'required|in:None,Senior/PWD',
+
                 'payment_method' => 'required|in:Cash,GCash',
-                'amount_received' => 'required|numeric|min:0',
+                'amount_received' => 'required_if:payment_method,Cash|numeric|min:0',
                 'reference_number' => 'nullable|string|max:100',
                 'proof_path' => 'nullable|string|max:255',
             ]);
@@ -79,12 +83,25 @@ class OrderController extends Controller
 
             $discountAmount = 0;
 
+            if ($validated['discount_type'] === 'Senior/PWD') {
+
+                $discountAmount = $subtotal * 0.20;
+            }
+
             $totalAmount = $subtotal - $discountAmount;
-            if ($validated['amount_received'] < $totalAmount) {
+            if (
+                $validated['payment_method'] === 'Cash' &&
+                $validated['amount_received'] < $totalAmount
+            ) {
                 return response()->json([
                     'message' => 'Payment amount is insufficient.',
                 ], 422);
             }
+
+            if ($validated['payment_method'] === 'GCash') {
+                $validated['amount_received'] = $totalAmount;
+            }
+
             $validated['subtotal'] = $subtotal;
             $validated['discount_amount'] = $discountAmount;
             $validated['total_amount'] = $totalAmount;
@@ -101,12 +118,13 @@ class OrderController extends Controller
             $validated['completed_at'] = null;
 
             $order = Order::create([
-                'cashier_id' => $validated['cashier_id'],
+                'cashier_id' => $cashier->id,
                 'order_number' => $validated['order_number'],
                 'order_type' => $validated['order_type'],
                 'status' => $validated['status'],
                 'subtotal' => $validated['subtotal'],
                 'discount_amount' => $validated['discount_amount'],
+                'discount_type' => $validated['discount_type'],
                 'total_amount' => $validated['total_amount'],
                 'ordered_at' => $validated['ordered_at'],
                 'completed_at' => $validated['completed_at'],
@@ -162,7 +180,7 @@ class OrderController extends Controller
 
             Payment::create([
                 'order_id' => $order->id,
-                'received_by' => $validated['cashier_id'],
+                'received_by' => $cashier->id,
                 'payment_method' => $validated['payment_method'],
                 'amount' => $totalAmount,
                 'amount_received' => $validated['amount_received'],
@@ -174,7 +192,7 @@ class OrderController extends Controller
 
             $inventoryService->deductForOrder(
                 $order->load('orderItems.menuItem.recipeItems', 'orderItems.options'),
-                User::findOrFail($validated['cashier_id'])
+                $cashier
             );
 
             return response()->json([
@@ -199,7 +217,21 @@ class OrderController extends Controller
     {
         //
     }
+    public function completeOrder(Order $order)
+    {
+        if ($order->status !== 'Ready') {
+            return redirect('/kitchen')
+                ->with('error', 'Only ready orders can be completed.');
+        }
 
+        $order->update([
+            'status' => 'Completed',
+            'completed_at' => now(),
+        ]);
+
+        return redirect('/kitchen')
+            ->with('success', 'Order completed successfully.');
+    }
     /**
      * Update the specified resource in storage.
      */

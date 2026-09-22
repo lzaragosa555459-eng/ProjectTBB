@@ -1,11 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
+<x-app-layout>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <x-slot name="header">
+        <div>
+            <h2 style="
+                margin: 0;
+                color: #6b4328;
+                font-size: 24px;
+                font-weight: bold;
+            ">
+                Point of Sale
+            </h2>
 
-    <title>The Brewing Bar - POS</title>
+            <p style="
+                margin: 5px 0 0;
+                color: #76543c;
+                font-size: 14px;
+            ">
+                Create and process customer orders
+            </p>
+        </div>
+    </x-slot>
 
     <style>
         * {
@@ -209,10 +223,6 @@
 
         }
     </style>
-</head>
-
-<body>
-
     <div class="pos-container">
 
         <!-- MENU -->
@@ -275,7 +285,27 @@
 
                 <div class="summary-row">
                     <span>Discount</span>
-                    <span>₱0.00</span>
+                    <span id="discount">₱0.00</span>
+                </div>
+
+                <div class="discount-buttons">
+
+                    <button
+                        type="button"
+                        id="noDiscountButton"
+                        class="discount-button active"
+                        onclick="selectDiscount('None')">
+                        No Discount
+                    </button>
+
+                    <button
+                        type="button"
+                        id="seniorPwdButton"
+                        class="discount-button"
+                        onclick="selectDiscount('Senior/PWD')">
+                        Senior/PWD
+                    </button>
+
                 </div>
 
                 <div class="summary-row total">
@@ -495,6 +525,9 @@
         let cart = [];
         let selectedMenuItem = null;
 
+        let discountType = 'None';
+        const DISCOUNT_RATE = 0.20;
+
         document.querySelectorAll('.add-to-cart').forEach(button => {
 
             button.addEventListener('click', function() {
@@ -573,6 +606,9 @@
         `;
 
                 document.getElementById('subtotal').textContent =
+                    '₱0.00';
+
+                document.getElementById('discount').textContent =
                     '₱0.00';
 
                 document.getElementById('total').textContent =
@@ -716,11 +752,26 @@
 
             });
 
+            let discountAmount = 0;
+
+            if (discountType === 'Senior/PWD') {
+
+                discountAmount =
+                    subtotal * DISCOUNT_RATE;
+
+            }
+
+            const total =
+                subtotal - discountAmount;
+
             document.getElementById('subtotal').textContent =
                 `₱${subtotal.toFixed(2)}`;
 
+            document.getElementById('discount').textContent =
+                `₱${discountAmount.toFixed(2)}`;
+
             document.getElementById('total').textContent =
-                `₱${subtotal.toFixed(2)}`;
+                `₱${total.toFixed(2)}`;
         }
 
         function increaseQuantity(index) {
@@ -905,15 +956,32 @@
                 0
             );
 
+            let discountAmount = 0;
+
+            if (discountType === 'Senior/PWD') {
+
+                discountAmount =
+                    subtotal * DISCOUNT_RATE;
+
+            }
+
+            const total =
+                subtotal - discountAmount;
+
             document.getElementById(
                     'checkoutSubtotal'
                 ).textContent =
                 `₱${subtotal.toFixed(2)}`;
 
             document.getElementById(
+                    'checkoutDiscount'
+                ).textContent =
+                `₱${discountAmount.toFixed(2)}`;
+
+            document.getElementById(
                     'checkoutTotal'
                 ).textContent =
-                `₱${subtotal.toFixed(2)}`;
+                `₱${total.toFixed(2)}`;
 
 
             // Reset payment fields
@@ -988,15 +1056,24 @@
             .getElementById('amountReceived')
             .addEventListener('input', function() {
 
-                const totalText =
-                    document.getElementById(
-                        'checkoutTotal'
-                    ).textContent;
+                const subtotal =
+                    cart.reduce(
+                        (total, item) =>
+                        total + (item.price * item.quantity),
+                        0
+                    );
+
+                let discountAmount = 0;
+
+                if (discountType === 'Senior/PWD') {
+
+                    discountAmount =
+                        subtotal * DISCOUNT_RATE;
+
+                }
 
                 const total =
-                    parseFloat(
-                        totalText.replace('₱', '')
-                    ) || 0;
+                    subtotal - discountAmount;
 
                 const received =
                     parseFloat(this.value) || 0;
@@ -1035,28 +1112,35 @@
                     'input[name="payment_method"]:checked'
                 ).value;
 
-            const totalText =
-                document.getElementById(
-                    'checkoutTotal'
-                ).textContent;
+            let amountReceived = 0;
 
-            const total =
-                parseFloat(
-                    totalText.replace('₱', '')
-                ) || 0;
-
-            const amountReceived =
-                parseFloat(
-                    document.getElementById(
-                        'amountReceived'
-                    ).value
-                ) || 0;
+            if (paymentMethod === 'Cash') {
+                amountReceived =
+                    parseFloat(
+                        document.getElementById(
+                            'amountReceived'
+                        ).value
+                    ) || 0;
+            }
 
             const gcashReference =
                 document.getElementById(
                     'gcashReference'
                 ).value.trim();
 
+            const subtotal = cart.reduce(
+                (total, item) =>
+                total + (item.price * item.quantity),
+                0
+            );
+
+            let discountAmount = 0;
+
+            if (discountType === 'Senior/PWD') {
+                discountAmount = subtotal * DISCOUNT_RATE;
+            }
+
+            const totalAmount = subtotal - discountAmount;
 
             // Cash validation
             if (paymentMethod === 'Cash') {
@@ -1099,11 +1183,13 @@
 
             const data = {
 
-                cashier_id: 2,
-
                 order_type: orderType,
 
                 items: items,
+
+                discount_type: discountType,
+
+                discount_amount: discountAmount,
 
                 payment_method: paymentMethod,
 
@@ -1174,7 +1260,27 @@
             }
 
         }
-    </script>
-</body>
 
-</html>
+        function selectDiscount(type) {
+
+            discountType = type;
+
+            document
+                .getElementById('noDiscountButton')
+                .classList.toggle(
+                    'active',
+                    type === 'None'
+                );
+
+            document
+                .getElementById('seniorPwdButton')
+                .classList.toggle(
+                    'active',
+                    type === 'Senior/PWD'
+                );
+
+            renderCart();
+        }
+    </script>
+
+</x-app-layout>

@@ -21,6 +21,7 @@ class Order extends Model
         'status',
         'subtotal',
         'discount_amount',
+        'discount_type',
         'total_amount',
         'ordered_at',
         'completed_at',
