@@ -574,6 +574,21 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+
+        .menu-card-photo {
+            width: 100%;
+            height: 150px;
+            overflow: hidden;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .menu-card-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
     </style>
 
     <div class="pos-container">
@@ -630,7 +645,9 @@
                     onclick="this.querySelector('.add-to-cart').click()">
 
                     <div class="menu-card-photo">
-                        PHOTO
+                        <img
+                            src="{{ asset('images/menu/sample.png') }}"
+                            alt="{{ $menuItem->name }}">
                     </div>
 
                     <h3>

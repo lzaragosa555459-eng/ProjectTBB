@@ -7,7 +7,7 @@
 
             <div class="logo-container">
                 <img
-                    src="{{ asset('images/brewing-bar-logo.png') }}"
+                    src="{{ asset('images/logo/brewing-bar-logo.png') }}"
                     alt="The Brewing Bar"
                     class="brewing-logo">
             </div>

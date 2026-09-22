@@ -5,7 +5,10 @@
 
         <a href="{{ route('dashboard') }}">
             <div class="sidebar-logo">
-                ☕
+                <img
+                    src="{{ asset('images/logo/brewing-bar-logo.png') }}"
+                    alt="The Brewing Bar"
+                    class="brewing-logo">
             </div>
 
             <div class="sidebar-title">
@@ -97,21 +100,25 @@
 
 
 <style>
+    .brewing-logo {
+        height: 80px;
+        width: auto;
+        display: block;
+        margin: 0 auto;
+    }
+
     .sidebar {
         width: 285px;
         min-width: 285px;
         height: 100vh;
-
         background: #ead8c4;
-
         border-right: 2px solid #8b5e3c;
-
-        padding: 32px 20px;
-
+        padding: 20px 20px;
         display: flex;
         flex-direction: column;
-
         color: #6b4328;
+
+        overflow: hidden;
     }
 
 
@@ -119,7 +126,7 @@
 
     .sidebar-brand {
         text-align: center;
-        padding-bottom: 24px;
+        padding-bottom: 15px;
     }
 
     .sidebar-brand a {
