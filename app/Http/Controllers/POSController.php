@@ -16,7 +16,7 @@ class POSController extends Controller
                 true
             )
             ->orderBy('name')
-            ->get();
+            ->paginate(6);
 
         return view('pos.index', compact('menuItems'));
     }

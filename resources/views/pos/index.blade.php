@@ -236,7 +236,7 @@
             border: 1px solid #b99173;
             border-radius: 9px;
 
-            padding: 8px;
+            padding: 12px;
 
             cursor: pointer;
 
@@ -256,7 +256,7 @@
     ========================= */
 
         .menu-card-photo {
-            height: 66px;
+            height: 90px;
 
             display: flex;
             align-items: center;
@@ -378,6 +378,42 @@
 
             padding-top: 10px;
             margin-top: 8px;
+        }
+
+        .cart-item-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quantity-controls button {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #c9aa8c;
+            background: #fffaf4;
+            color: #6b4328;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .remove-item {
+            border: none;
+            background: none;
+            color: #8b5e3c;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .remove-item:hover {
+            text-decoration: underline;
         }
 
         .summary-row {
@@ -589,6 +625,53 @@
             object-fit: cover;
             display: block;
         }
+
+        .pos-pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            margin-top: 24px;
+            margin-bottom: 10px;
+        }
+
+        .pos-pagination a,
+        .pos-pagination span {
+            min-width: 40px;
+            height: 40px;
+            padding: 0 12px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: 1px solid #c9aa8c;
+            border-radius: 7px;
+
+            background: #fffaf4;
+            color: #6b4328;
+
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .pos-pagination a:hover {
+            background: #ead8c4;
+            border-color: #8b5e3c;
+        }
+
+        .pos-pagination .pagination-active {
+            background: #8b5e3c;
+            border-color: #8b5e3c;
+            color: white;
+        }
+
+        .pos-pagination .pagination-disabled {
+            background: #f3e4d2;
+            color: #b9a18c;
+            cursor: default;
+        }
     </style>
 
     <div class="pos-container">
@@ -677,6 +760,37 @@
                 @endforeach
 
             </div>
+            @if ($menuItems->hasPages())
+            <div class="pos-pagination">
+
+                @if ($menuItems->onFirstPage())
+                <span class="pagination-disabled">←</span>
+                @else
+                <a href="{{ $menuItems->previousPageUrl() }}">←</a>
+                @endif
+
+                @foreach ($menuItems->getUrlRange(1, $menuItems->lastPage()) as $page => $url)
+
+                @if ($page == $menuItems->currentPage())
+                <span class="pagination-active">
+                    {{ $page }}
+                </span>
+                @else
+                <a href="{{ $url }}">
+                    {{ $page }}
+                </a>
+                @endif
+
+                @endforeach
+
+                @if ($menuItems->hasMorePages())
+                <a href="{{ $menuItems->nextPageUrl() }}">→</a>
+                @else
+                <span class="pagination-disabled">→</span>
+                @endif
+
+            </div>
+            @endif
 
         </section>
 
@@ -1098,6 +1212,13 @@
                             </button>
 
                         </div>
+
+                            <button
+                                type="button"
+                                class="remove-item"
+                                onclick="removeCartItem(${index})">
+                                Remove
+                            </button>
 
                         <div class="cart-item-total">
                             ₱${itemSubtotal.toFixed(2)}
