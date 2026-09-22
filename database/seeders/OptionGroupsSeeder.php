@@ -18,5 +18,10 @@ class OptionGroupsSeeder extends Seeder
             'name' => 'Flavor',
             'description' => 'Flavor options for beverages.',
         ]);
+
+        Option_Groups::create([
+            'name' => 'Size',
+            'description' => 'Drink size options.',
+        ]);
     }
 }

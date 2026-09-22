@@ -12,6 +12,7 @@ class OptionValuesSeeder extends Seeder
     {
         $temperature = Option_Groups::where('name', 'Temperature')->first();
         $flavor = Option_Groups::where('name', 'Flavor')->first();
+        $sizeGroup = Option_Groups::where('name', 'Size')->first();
 
         Option_Values::create([
             'option_group_id' => $temperature->id,
@@ -45,6 +46,20 @@ class OptionValuesSeeder extends Seeder
             'option_group_id' => $flavor->id,
             'name' => 'Hazelnut',
             'price_adjustment' => 0,
+            'is_active' => true,
+        ]);
+
+        Option_Values::create([
+            'option_group_id' => $sizeGroup->id,
+            'name' => 'Regular',
+            'price_adjustment' => 0,
+            'is_active' => true,
+        ]);
+
+        Option_Values::create([
+            'option_group_id' => $sizeGroup->id,
+            'name' => 'Large',
+            'price_adjustment' => 20,
             'is_active' => true,
         ]);
     }

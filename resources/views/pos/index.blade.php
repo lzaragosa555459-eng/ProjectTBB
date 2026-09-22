@@ -29,183 +29,420 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            color: #222;
+            background: #f3e4d2;
+            color: #6b4328;
         }
+
+        /* =========================
+       POS MAIN LAYOUT
+    ========================= */
 
         .pos-container {
             display: flex;
-            height: 100vh;
+            height: calc(100vh - 85px);
+            overflow: hidden;
+            background: #f3e4d2;
         }
 
-        /* Left side */
+        /* =========================
+       MENU SECTION
+    ========================= */
+
         .menu-section {
             width: 65%;
-            padding: 24px;
+            padding: 16px 26px 20px;
             overflow-y: auto;
+            min-height: 0;
+            background: #f8f1e8;
         }
 
+        /* Hide old POS heading */
         .header {
-            margin-bottom: 20px;
+            display: none;
         }
 
-        .header h1 {
-            margin: 0;
+        /* =========================
+       CATEGORY TABS
+    ========================= */
+
+        .category-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+            padding: 9px;
+            background: #c9a98e;
+            border-radius: 7px;
         }
 
-        .header p {
-            margin-top: 5px;
-            color: #777;
+        .category-tab {
+            flex: 1;
+            padding: 8px 12px;
+
+            border: 1px solid #a97856;
+            border-radius: 6px;
+
+            background: transparent;
+            color: #6b4328;
+
+            font-family: Georgia, serif;
+            font-size: 12px;
+            font-weight: bold;
+
+            cursor: pointer;
         }
+
+        .category-tab:hover {
+            background: #d8b99a;
+        }
+
+        .category-tab.active {
+            background: #b48765;
+            color: white;
+            border-color: #b48765;
+        }
+
+        /* =========================
+       MENU GRID
+    ========================= */
 
         .menu-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
         }
 
+        /* =========================
+       MENU CARD
+    ========================= */
+
         .menu-card {
-            background: white;
-            border-radius: 10px;
-            padding: 18px;
-            border: 1px solid #ddd;
+            background: #d0ad91;
+            border: 1px solid #b99173;
+            border-radius: 9px;
+
+            padding: 8px;
+
             cursor: pointer;
+
+            box-shadow: 0 2px 4px rgba(107, 67, 40, 0.18);
+
+            transition: 0.15s;
         }
 
         .menu-card:hover {
-            border-color: #333;
+            transform: translateY(-1px);
+            border-color: #8b5e3c;
+            box-shadow: 0 4px 8px rgba(107, 67, 40, 0.22);
         }
 
+        /* =========================
+       PRODUCT PHOTO
+    ========================= */
+
+        .menu-card-photo {
+            height: 66px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #b99173;
+
+            border-radius: 6px;
+
+            margin-bottom: 7px;
+
+            color: white;
+
+            font-family: Georgia, serif;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* =========================
+       PRODUCT INFO
+    ========================= */
+
         .menu-card h3 {
-            margin: 0 0 8px;
+            margin: 0;
+
+            color: #6b4328;
+
+            font-family: Georgia, serif;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .menu-card-category {
+            margin-top: 2px;
+
+            color: #76543c;
+
+            font-family: Georgia, serif;
+            font-size: 10px;
+            font-style: italic;
         }
 
         .menu-card .price {
+            margin-top: 5px;
+
+            color: #6b4328;
+
+            font-size: 12px;
             font-weight: bold;
-            margin-bottom: 10px;
         }
 
+        /* Hide Add to Order button */
         .menu-card button {
-            width: 100%;
-            padding: 9px;
-            border: none;
-            border-radius: 6px;
-            background: #222;
-            color: white;
-            cursor: pointer;
+            display: none;
         }
 
-        /* Right side */
+        /* =========================
+       CART
+    ========================= */
+
         .cart-section {
             width: 35%;
-            background: white;
-            border-left: 1px solid #ddd;
-            padding: 24px;
+
+            background: #c9a98e;
+
+            border-left: 1px solid #b99173;
+
+            padding: 14px 12px;
+
             display: flex;
             flex-direction: column;
+
+            min-height: 0;
+            overflow: hidden;
+
+            box-shadow: -3px 0 8px rgba(107, 67, 40, 0.08);
         }
 
         .cart-section h2 {
-            margin-top: 0;
+            margin: 0 0 10px;
+
+            padding: 8px 10px;
+
+            background: #a97856;
+            color: white;
+
+            border-radius: 6px 6px 0 0;
+
+            font-family: Georgia, serif;
+            font-size: 21px;
         }
+
+        /* =========================
+       CART ITEMS
+    ========================= */
 
         .cart-items {
             flex: 1;
             overflow-y: auto;
+            min-height: 0;
         }
 
         .empty-cart {
-            color: #888;
             text-align: center;
-            margin-top: 40px;
+
+            margin-top: 30px;
+
+            color: #76543c;
+
+            font-size: 13px;
         }
 
+        /* =========================
+       CART SUMMARY
+    ========================= */
+
         .cart-summary {
-            border-top: 1px solid #ddd;
-            padding-top: 20px;
+            border-top: 1px solid #a97856;
+
+            padding-top: 10px;
+            margin-top: 8px;
         }
 
         .summary-row {
             display: flex;
+
             justify-content: space-between;
-            margin-bottom: 10px;
+
+            margin-bottom: 7px;
+
+            color: #6b4328;
+
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .discount-buttons {
+            display: flex;
+            gap: 8px;
+
+            margin: 8px 0;
+        }
+
+        .discount-button {
+            flex: 1;
+
+            padding: 8px;
+
+            border: 1px solid #a97856;
+            border-radius: 6px;
+
+            background: #d8b99a;
+
+            color: #6b4328;
+
+            font-family: Georgia, serif;
+            font-size: 11px;
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        .discount-button:hover {
+            background: #b99173;
+        }
+
+        .discount-button.active {
+            background: #a97856;
+
+            border-color: #a97856;
+
+            color: white;
         }
 
         .total {
-            font-size: 22px;
-            font-weight: bold;
+            border-top: 1px solid #a97856;
+
+            padding-top: 8px;
+            margin-top: 8px;
+
+            font-size: 17px;
         }
 
         .checkout-button {
             width: 100%;
-            padding: 14px;
-            margin-top: 15px;
-            border: none;
-            border-radius: 8px;
-            background: #222;
-            color: white;
-            font-size: 16px;
+
+            padding: 9px;
+
+            margin-top: 8px;
+
+            border: 1px solid #a97856;
+            border-radius: 6px;
+
+            background: #d8b99a;
+
+            color: #6b4328;
+
+            font-family: Georgia, serif;
+            font-size: 12px;
+            font-weight: bold;
+
             cursor: pointer;
         }
 
+        .checkout-button:hover {
+            background: #b99173;
+            color: white;
+        }
+
+        /* =========================
+       OPTION MODAL
+    ========================= */
+
         .option-modal {
             display: none;
+
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.5);
+
+            background: rgba(60, 35, 20, 0.55);
+
             align-items: center;
             justify-content: center;
+
             z-index: 1000;
         }
 
         .option-modal-content {
-            background: white;
+            background: #fffaf4;
+
             width: 420px;
             max-width: 90%;
+
             padding: 24px;
-            border-radius: 12px;
+
+            border-radius: 10px;
+
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
 
         .option-modal-content h2 {
             margin-top: 0;
+
+            color: #6b4328;
+
+            font-family: Georgia, serif;
         }
 
         .option-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .option-group h3 {
-            margin-bottom: 10px;
+            margin-bottom: 9px;
+
+            color: #6b4328;
+
+            font-size: 15px;
         }
 
         .option-choice {
             display: block;
+
             margin-bottom: 8px;
+
+            color: #76543c;
+
+            font-size: 14px;
         }
 
         .option-modal-actions {
             display: flex;
             gap: 10px;
+
             margin-top: 20px;
         }
 
         .option-modal-actions button {
             flex: 1;
+
             padding: 10px;
+
             border: none;
             border-radius: 6px;
+
             cursor: pointer;
         }
 
         .option-modal-actions button:last-child {
-            background: #222;
+            background: #8b5e3c;
             color: white;
         }
+
+        /* =========================
+       RESPONSIVE
+    ========================= */
 
         @media (max-width: 900px) {
 
             .pos-container {
                 flex-direction: column;
+                height: auto;
             }
 
             .menu-section,
@@ -214,32 +451,79 @@
             }
 
             .cart-section {
-                margin-top: 20px;
+                min-height: 450px;
             }
 
             .menu-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-
         }
     </style>
+
     <div class="pos-container">
 
         <!-- MENU -->
         <section class="menu-section">
 
-            <div class="header">
-                <h1>The Brewing Bar</h1>
-                <p>Point of Sale</p>
+            <div class="category-tabs">
+
+                <button
+                    type="button"
+                    class="category-tab active"
+                    onclick="filterCategory('All', this)">
+                    ALL
+                </button>
+
+                <button
+                    type="button"
+                    class="category-tab"
+                    onclick="filterCategory('Coffee', this)">
+                    COFFEE
+                </button>
+
+                <button
+                    type="button"
+                    class="category-tab"
+                    onclick="filterCategory('Non-Coffee', this)">
+                    NON-COFFEE
+                </button>
+
+                <button
+                    type="button"
+                    class="category-tab"
+                    onclick="filterCategory('Pastries', this)">
+                    PASTRIES
+                </button>
+
+                <button
+                    type="button"
+                    class="category-tab"
+                    onclick="filterCategory('Food', this)">
+                    FOOD
+                </button>
+
             </div>
 
             <div class="menu-grid">
 
                 @foreach ($menuItems as $menuItem)
 
-                <div class="menu-card">
+                <div
+                    class="menu-card"
+                    data-category="{{ $menuItem->category->name }}"
+                    onclick="this.querySelector('.add-to-cart').click()">
 
-                    <h3>{{ $menuItem->name }}</h3>
+                    <div class="menu-card-photo">
+                        PHOTO
+                    </div>
+
+                    <h3>
+                        {{ $menuItem->name }}
+                    </h3>
+
+                    <div class="menu-card-category">
+                        {{ $menuItem->category->name ?? 'Menu Item' }}
+                    </div>
 
                     <div class="price">
                         ₱{{ number_format($menuItem->base_price, 2) }}
@@ -630,7 +914,7 @@
 
                 const optionText =
                     item.options && item.options.length > 0 ?
-                    item.options.map(option => option.name).join(', ') :
+                    item.options.map(option => option.name).join(' • ') :
                     '';
 
                 cartItems.innerHTML += `
@@ -659,9 +943,10 @@
                     optionText
                         ? `
                             <div style="
-                                margin-top: 5px;
-                                color: #777;
-                                font-size: 14px;
+                                margin-top: 6px;
+                                color: #8b6a50;
+                                font-size: 13px;
+                                font-weight: 600;
                             ">
                                 ${optionText}
                             </div>
@@ -839,7 +1124,10 @@
                             value="${value.id}"
                         >
 
-                        ${value.name}
+                    ${value.name}
+                    ${Number(value.price_adjustment) > 0
+                        ? `(+₱${Number(value.price_adjustment).toFixed(2)})`
+                        : ''}
 
                     </label>
                 `;
@@ -1280,6 +1568,39 @@
                 );
 
             renderCart();
+        }
+
+        function filterCategory(category, button) {
+
+            document
+                .querySelectorAll('.category-tab')
+                .forEach(tab => {
+                    tab.classList.remove('active');
+                });
+
+            button.classList.add('active');
+
+            document
+                .querySelectorAll('.menu-card')
+                .forEach(card => {
+
+                    const cardCategory =
+                        card.dataset.category;
+
+                    if (
+                        category === 'All' ||
+                        cardCategory === category
+                    ) {
+
+                        card.style.display = '';
+
+                    } else {
+
+                        card.style.display = 'none';
+
+                    }
+
+                });
         }
     </script>
 

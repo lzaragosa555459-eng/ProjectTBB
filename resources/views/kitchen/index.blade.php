@@ -1,291 +1,855 @@
 <x-app-layout>
 
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            Kitchen Orders
-        </h2>
-    </x-slot>
+    <div class="kitchen-page">
 
-    <div class="py-6">
+        {{-- Header --}}
+        <div class="kitchen-header">
+
+            <div>
+                <h1>Kitchen / Bar Orders</h1>
+                <p>Manage active orders and preparation status.</p>
+            </div>
+
+        </div>
+
+
+        {{-- Messages --}}
         @if (session('success'))
-        <div style="
-        background: #dcfce7;
-        color: #166534;
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-    ">
+        <div class="kitchen-message success">
             {{ session('success') }}
         </div>
         @endif
 
         @if (session('error'))
-        <div style="
-        background: #fee2e2;
-        color: #991b1b;
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-    ">
+        <div class="kitchen-message error">
             {{ session('error') }}
         </div>
         @endif
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-            <div class="orders">
 
-                @forelse ($orders as $orderItems)
+        {{-- Order Board --}}
+        <div class="kitchen-board">
+
+            {{-- =========================
+                 PENDING
+            ========================= --}}
+            <div class="kitchen-column">
+
+                <div class="column-title pending-title">
+                    Pending
+                </div>
+
+                <div class="column-orders">
+
+                    @php
+                    $pendingOrders = $orders->filter(
+                    fn ($orderItems) =>
+                    $orderItems->contains(
+                    fn ($item) => $item->status === 'Pending'
+                    )
+                    );
+                    @endphp
+
+                    @forelse ($pendingOrders as $orderItems)
+
+                    @php
+                    $firstKitchenOrder = $orderItems->first();
+                    $order = $firstKitchenOrder->orderItem->order;
+                    @endphp
+
+                    <div class="kitchen-card">
+
+                        <div class="order-top">
+
+                            <strong>
+                                {{ $order->order_number }}
+                            </strong>
+
+                            <span>
+                                {{ $order->order_type }}
+                            </span>
+
+                        </div>
+
+
+                        @foreach ($orderItems as $kitchenOrder)
+
+                        @if ($kitchenOrder->status === 'Pending')
+
+                        <div class="kitchen-item">
+
+                            <div class="item-main">
+                                {{ $kitchenOrder->orderItem->quantity }}x
+                                {{ $kitchenOrder->orderItem->menuItem->name }}
+                            </div>
+
+
+                            @if ($kitchenOrder->orderItem->options->count())
+
+                            <div class="item-options">
+
+                                @foreach ($kitchenOrder->orderItem->options as $option)
+
+                                {{ $option->optionValue->name }}
+
+                                @if (!$loop->last)
+                                •
+                                @endif
+
+                                @endforeach
+
+                            </div>
+
+                            @endif
+
+
+                            @if ($kitchenOrder->orderItem->notes)
+
+                            <div class="item-notes">
+                                Note:
+                                {{ $kitchenOrder->orderItem->notes }}
+                            </div>
+
+                            @endif
+
+
+                            @if (Auth::user()->role_id === 3)
+
+                            <form
+                                method="POST"
+                                action="/kitchen/{{ $kitchenOrder->id }}/start">
+                                @csrf
+
+                                <button
+                                    type="submit"
+                                    class="kitchen-button">
+                                    Start Preparing
+                                </button>
+
+                            </form>
+
+                            @endif
+
+                        </div>
+
+                        @endif
+
+                        @endforeach
+
+                    </div>
+
+                    @empty
+
+                    <div class="empty-column">
+                        No pending orders.
+                    </div>
+
+                    @endforelse
+
+                </div>
+
+            </div>
+
+
+            {{-- =========================
+                 PREPARING
+            ========================= --}}
+            <div class="kitchen-column">
+
+                <div class="column-title preparing-title">
+                    Preparing
+                </div>
+
+                <div class="column-orders">
+
+                    @php
+                    $preparingOrders = $orders->filter(
+                    fn ($orderItems) =>
+                    $orderItems->contains(
+                    fn ($item) => $item->status === 'Preparing'
+                    )
+                    );
+                    @endphp
+
+                    @forelse ($preparingOrders as $orderItems)
+
+                    @php
+                    $firstKitchenOrder = $orderItems->first();
+                    $order = $firstKitchenOrder->orderItem->order;
+                    @endphp
+
+                    <div class="kitchen-card">
+
+                        <div class="order-top">
+
+                            <strong>
+                                {{ $order->order_number }}
+                            </strong>
+
+                            <span>
+                                {{ $order->order_type }}
+                            </span>
+
+                        </div>
+
+
+                        @foreach ($orderItems as $kitchenOrder)
+
+                        @if ($kitchenOrder->status === 'Preparing')
+
+                        <div class="kitchen-item">
+
+                            <div class="item-main">
+                                {{ $kitchenOrder->orderItem->quantity }}x
+                                {{ $kitchenOrder->orderItem->menuItem->name }}
+                            </div>
+
+
+                            @if ($kitchenOrder->orderItem->options->count())
+
+                            <div class="item-options">
+
+                                @foreach ($kitchenOrder->orderItem->options as $option)
+
+                                {{ $option->optionValue->name }}
+
+                                @if (!$loop->last)
+                                •
+                                @endif
+
+                                @endforeach
+
+                            </div>
+
+                            @endif
+
+
+                            @if ($kitchenOrder->orderItem->notes)
+
+                            <div class="item-notes">
+                                Note:
+                                {{ $kitchenOrder->orderItem->notes }}
+                            </div>
+
+                            @endif
+
+
+                            @if ($kitchenOrder->preparedBy)
+
+                            <div class="prepared-by">
+                                By {{ $kitchenOrder->preparedBy->name }}
+                            </div>
+
+                            @endif
+
+
+                            @if (Auth::user()->role_id === 3)
+
+                            <form
+                                method="POST"
+                                action="/kitchen/{{ $kitchenOrder->id }}/complete">
+                                @csrf
+
+                                <button
+                                    type="submit"
+                                    class="kitchen-button">
+                                    Mark as Ready
+                                </button>
+
+                            </form>
+
+                            @endif
+
+                        </div>
+
+                        @endif
+
+                        @endforeach
+
+                    </div>
+
+                    @empty
+
+                    <div class="empty-column">
+                        No orders being prepared.
+                    </div>
+
+                    @endforelse
+
+                </div>
+
+            </div>
+
+
+            {{-- =========================
+                 READY
+            ========================= --}}
+            <div class="kitchen-column">
+
+                <div class="column-title ready-title">
+                    Ready
+                </div>
+
+                <div class="column-orders">
+
+                    @php
+                    $readyOrders = $orders->filter(
+                    fn ($orderItems) =>
+                    $orderItems->every(
+                    fn ($item) => $item->status === 'Ready'
+                    )
+                    );
+                    @endphp
+
+                    @forelse ($readyOrders as $orderItems)
+
+                    @php
+                    $firstKitchenOrder = $orderItems->first();
+                    $order = $firstKitchenOrder->orderItem->order;
+                    @endphp
+
+                    <div class="kitchen-card">
+
+                        <div class="order-top">
+
+                            <strong>
+                                {{ $order->order_number }}
+                            </strong>
+
+                            <span>
+                                {{ $order->order_type }}
+                            </span>
+
+                        </div>
+
+
+                        @foreach ($orderItems as $kitchenOrder)
+
+                        <div class="kitchen-item">
+
+                            <div class="item-main">
+                                {{ $kitchenOrder->orderItem->quantity }}x
+                                {{ $kitchenOrder->orderItem->menuItem->name }}
+                            </div>
+
+
+                            @if ($kitchenOrder->orderItem->options->count())
+
+                            <div class="item-options">
+
+                                @foreach ($kitchenOrder->orderItem->options as $option)
+
+                                {{ $option->optionValue->name }}
+
+                                @if (!$loop->last)
+                                •
+                                @endif
+
+                                @endforeach
+
+                            </div>
+
+                            @endif
+
+                        </div>
+
+                        @endforeach
+
+
+                        @if (Auth::user()->role_id === 3)
+
+                        <form
+                            method="POST"
+                            action="/orders/{{ $order->id }}/complete">
+                            @csrf
+
+                            <button
+                                type="submit"
+                                class="complete-button">
+                                Complete Order
+                            </button>
+
+                        </form>
+
+                        @endif
+
+                    </div>
+
+                    @empty
+
+                    <div class="empty-column">
+                        No ready orders.
+                    </div>
+
+                    @endforelse
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{-- =========================
+             COMPLETED ORDERS
+        ========================= --}}
+
+        <div class="completed-section">
+
+            <div class="completed-header">
+                Completed Orders
+            </div>
+
+            <div class="completed-orders">
+
+                @forelse ($completedOrders as $orderItems)
 
                 @php
                 $firstKitchenOrder = $orderItems->first();
                 $order = $firstKitchenOrder->orderItem->order;
                 @endphp
 
-                <div class="order-card">
+                <div class="completed-card">
 
-                    <div class="order-number">
-                        {{ $order->order_number }}
+                    <div>
+                        <strong>
+                            {{ $order->order_number }}
+                        </strong>
+
+                        <span>
+                            {{ $order->order_type }}
+                        </span>
                     </div>
 
-                    @foreach ($orderItems as $kitchenOrder)
+                    <div class="completed-items">
 
-                    <div style="
-                padding: 12px 0;
-                border-bottom: 1px solid #eee;
-            ">
+                        @foreach ($orderItems as $kitchenOrder)
 
-                        <div class="item-name">
-                            {{ $kitchenOrder->orderItem->menuItem->name }}
-                        </div>
+                        {{ $kitchenOrder->orderItem->quantity }}x
+                        {{ $kitchenOrder->orderItem->menuItem->name }}
 
-                        <div class="quantity">
-                            Quantity:
-                            {{ $kitchenOrder->orderItem->quantity }}
-                        </div>
-
-                        @if ($kitchenOrder->orderItem->options->count())
-                        <div class="options">
-                            <strong>Options:</strong>
-
-                            @foreach ($kitchenOrder->orderItem->options as $option)
-                            {{ $option->optionValue->name }}
-
-                            @if (!$loop->last)
-                            ,
-                            @endif
-                            @endforeach
-                        </div>
+                        @if (!$loop->last)
+                        •
                         @endif
 
-                        @if ($kitchenOrder->orderItem->notes)
-                        <div class="notes">
-                            <strong>Notes:</strong>
-                            {{ $kitchenOrder->orderItem->notes }}
-                        </div>
-                        @endif
-
-                        <div class="status">
-                            {{ $kitchenOrder->status }}
-                        </div>
-
-                        @if ($kitchenOrder->preparedBy)
-                        <div class="prepared-by">
-                            Prepared by:
-                            {{ $kitchenOrder->preparedBy->name }}
-                        </div>
-                        @endif
-
-                        @if (Auth::user()->role_id === 3 && $kitchenOrder->status === 'Pending')
-                        <form
-                            method="POST"
-                            action="/kitchen/{{ $kitchenOrder->id }}/start"
-                            style="margin-top: 15px;">
-                            @csrf
-
-                            <button type="submit">
-                                Start Preparing
-                            </button>
-                        </form>
-                        @endif
-
-                        @if (Auth::user()->role_id === 3 && $kitchenOrder->status === 'Preparing')
-                        <form
-                            method="POST"
-                            action="/kitchen/{{ $kitchenOrder->id }}/complete"
-                            style="margin-top: 15px;">
-                            @csrf
-
-                            <button type="submit">
-                                Mark as Ready
-                            </button>
-                        </form>
-                        @endif
+                        @endforeach
 
                     </div>
 
-                    @endforeach
+                    @if ($order->completed_at)
 
-                    @php
-                    $allReady = $orderItems->every(
-                    fn ($kitchenOrder) => $kitchenOrder->status === 'Ready'
-                    );
-                    @endphp
+                    <small>
+                        Completed:
+                        {{ $order->completed_at }}
+                    </small>
 
-                    @if (Auth::user()->role_id === 3 && $allReady)
-                    <form
-                        method="POST"
-                        action="/orders/{{ $order->id }}/complete"
-                        style="margin-top: 15px;">
-                        @csrf
-                        <button
-                            type="submit"
-                            style="
-                            background: #111827;
-                            color: white;
-                            padding: 10px 16px;
-                            border: none;
-                            border-radius: 6px;
-                            font-weight: 600;
-                            cursor: pointer;
-                        ">
-                            Complete Order
-                        </button>
-                    </form>
                     @endif
 
                 </div>
 
                 @empty
 
-                <p>No kitchen orders.</p>
+                <div class="empty-completed">
+                    No completed orders.
+                </div>
 
                 @endforelse
 
             </div>
 
         </div>
-    </div>
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8" style="margin-top: 40px;">
-
-        <h3 style="
-        font-size: 22px;
-        font-weight: bold;
-        margin-bottom: 20px;
-    ">
-            Completed Orders
-        </h3>
-
-        <div class="orders">
-
-            @forelse ($completedOrders as $orderItems)
-
-            @php
-            $firstKitchenOrder = $orderItems->first();
-            $order = $firstKitchenOrder->orderItem->order;
-            @endphp
-
-            <div class="order-card">
-
-                <div class="order-number">
-                    {{ $order->order_number }}
-                </div>
-
-                @foreach ($orderItems as $kitchenOrder)
-
-                <div style="
-                        padding: 12px 0;
-                        border-bottom: 1px solid #eee;
-                    ">
-
-                    <div class="item-name">
-                        {{ $kitchenOrder->orderItem->menuItem->name }}
-                    </div>
-
-                    <div class="quantity">
-                        Quantity:
-                        {{ $kitchenOrder->orderItem->quantity }}
-                    </div>
-
-                    <div class="status">
-                        Completed
-                    </div>
-
-                    @if ($kitchenOrder->preparedBy)
-                    <div class="prepared-by">
-                        Prepared by:
-                        {{ $kitchenOrder->preparedBy->name }}
-                    </div>
-                    @endif
-
-                </div>
-
-                @endforeach
-
-                @if ($order->completed_at)
-                <div style="margin-top: 15px; color: #555;">
-                    Completed at:
-                    {{ $order->completed_at }}
-                </div>
-                @endif
-
-            </div>
-
-            @empty
-
-            <p>No completed orders.</p>
-
-            @endforelse
-
-        </div>
 
     </div>
+
+
     <style>
-        .orders {
-            display: grid;
-            grid-template-columns: repeat(auto-fill,
-                    minmax(280px, 1fr));
-            gap: 20px;
+        /* =========================
+           PAGE
+        ========================= */
+
+        .kitchen-page {
+            min-height: calc(100vh - 70px);
+
+            padding: 28px 30px;
+
+            background: #f8f1e8;
+
+            color: #6b4328;
         }
 
-        .order-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        .kitchen-header {
+            margin-bottom: 22px;
         }
 
-        .order-number {
-            font-size: 20px;
+
+        .kitchen-header h1 {
+            margin: 0;
+
+            font-family: Georgia, serif;
+
+            font-size: 25px;
+
             font-weight: bold;
-            margin-bottom: 15px;
+
+            color: #6b4328;
         }
 
-        .item-name {
-            font-size: 18px;
-            font-weight: bold;
+
+        .kitchen-header p {
+            margin: 4px 0 0;
+
+            color: #8b6a50;
+
+            font-size: 13px;
         }
 
-        .quantity {
-            margin-top: 5px;
-        }
 
-        .status {
-            margin-top: 15px;
-            padding: 8px 12px;
-            display: inline-block;
+        /* =========================
+           MESSAGES
+        ========================= */
+
+        .kitchen-message {
+            padding: 10px 14px;
+
+            margin-bottom: 18px;
+
             border-radius: 6px;
-            background: #eee;
+
+            font-size: 13px;
+        }
+
+
+        .kitchen-message.success {
+            background: #e4eadc;
+            color: #536345;
+        }
+
+
+        .kitchen-message.error {
+            background: #ead5d0;
+            color: #8a4035;
+        }
+
+
+        /* =========================
+           BOARD
+        ========================= */
+
+        .kitchen-board {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr));
+
+            gap: 18px;
+
+            align-items: start;
+        }
+
+
+        .kitchen-column {
+            min-width: 0;
+        }
+
+
+        .column-title {
+            margin-bottom: 10px;
+
+            font-family: Georgia, serif;
+
+            font-size: 19px;
+
+            font-weight: bold;
+
+            font-style: italic;
+        }
+
+
+        .pending-title {
+            color: #c45a54;
+        }
+
+
+        .preparing-title {
+            color: #76543c;
+        }
+
+
+        .ready-title {
+            color: #4e9b61;
+        }
+
+
+        .column-orders {
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 12px;
+        }
+
+
+        /* =========================
+           ORDER CARD
+        ========================= */
+
+        .kitchen-card {
+            padding: 0 12px 12px;
+
+            border-radius: 7px;
+
+            background: #d5b99f;
+
+            box-shadow:
+                0 2px 5px rgba(107, 67, 40, 0.10);
+
+            overflow: hidden;
+        }
+
+
+        .order-top {
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            margin: 0 -12px 8px;
+
+            padding: 5px 10px;
+
+            background: #b18463;
+
+            color: white;
+
+            font-size: 11px;
+        }
+
+
+        .order-top strong {
+            font-family: Georgia, serif;
+        }
+
+
+        .order-top span {
+            font-size: 10px;
+        }
+
+
+        .kitchen-item {
+            padding: 9px 0;
+
+            border-bottom: 1px solid #b9987d;
+        }
+
+
+        .kitchen-item:last-child {
+            border-bottom: none;
+        }
+
+
+        .item-main {
+            color: #76543c;
+
+            font-size: 12px;
+
             font-weight: bold;
         }
 
-        .options {
-            margin-top: 10px;
-            color: #555;
+
+        .item-options {
+            margin-top: 4px;
+
+            color: #8b6a50;
+
+            font-size: 11px;
         }
 
-        .notes {
-            margin-top: 10px;
-            color: #555;
+
+        .item-notes {
+            margin-top: 5px;
+
+            color: #8a4035;
+
+            font-size: 11px;
+        }
+
+
+        .prepared-by {
+            margin-top: 5px;
+
+            color: #8b6a50;
+
+            font-size: 10px;
+        }
+
+
+        /* =========================
+           BUTTONS
+        ========================= */
+
+        .kitchen-button,
+        .complete-button {
+            width: 100%;
+
+            margin-top: 9px;
+
+            padding: 7px 10px;
+
+            border: 1px solid #a97e5f;
+
+            border-radius: 6px;
+
+            background: transparent;
+
+            color: #76543c;
+
+            font-family: Georgia, serif;
+
+            font-size: 11px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+
+        .kitchen-button:hover {
+            background: #b18463;
+
+            color: white;
+        }
+
+
+        .complete-button {
+            background: #4e9b61;
+
+            border-color: #4e9b61;
+
+            color: white;
+        }
+
+
+        .complete-button:hover {
+            background: #3d7f4d;
+        }
+
+
+        /* =========================
+           EMPTY
+        ========================= */
+
+        .empty-column {
+            padding: 25px 12px;
+
+            text-align: center;
+
+            border: 1px dashed #b9987d;
+
+            border-radius: 7px;
+
+            color: #9b7658;
+
+            font-size: 12px;
+        }
+
+
+        /* =========================
+           COMPLETED
+        ========================= */
+
+        .completed-section {
+            margin-top: 30px;
+        }
+
+
+        .completed-header {
+            margin-bottom: 12px;
+
+            color: #6b4328;
+
+            font-family: Georgia, serif;
+
+            font-size: 19px;
+
+            font-weight: bold;
+
+            font-style: italic;
+        }
+
+
+        .completed-orders {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fill, minmax(260px, 1fr));
+
+            gap: 12px;
+        }
+
+
+        .completed-card {
+            padding: 12px;
+
+            border: 1px solid #d8c2aa;
+
+            border-radius: 7px;
+
+            background: #fffaf4;
+
+            color: #76543c;
+        }
+
+
+        .completed-card>div:first-child {
+            display: flex;
+
+            justify-content: space-between;
+
+            font-size: 12px;
+        }
+
+
+        .completed-items {
+            margin-top: 7px;
+
+            font-size: 11px;
+        }
+
+
+        .completed-card small {
+            display: block;
+
+            margin-top: 7px;
+
+            color: #9b7658;
+
+            font-size: 10px;
+        }
+
+
+        .empty-completed {
+            color: #9b7658;
+
+            font-size: 12px;
+        }
+
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 900px) {
+
+            .kitchen-board {
+                grid-template-columns: 1fr;
+            }
+
         }
     </style>
 
