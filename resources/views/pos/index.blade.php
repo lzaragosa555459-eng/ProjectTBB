@@ -45,6 +45,122 @@
         }
 
         /* =========================
+       CARD STUFF
+    ========================= */
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            padding: 8px;
+
+            margin-bottom: 6px;
+
+            background: #b99173;
+
+            border-radius: 6px;
+
+            color: #6b4328;
+        }
+
+        .cart-item-image {
+            width: 38px;
+            height: 38px;
+
+            flex-shrink: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #a97856;
+
+            border-radius: 4px;
+
+            color: white;
+
+            font-family: Georgia, serif;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        .cart-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .cart-item-name {
+            font-size: 11px;
+            font-weight: bold;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cart-item-options {
+            margin-top: 2px;
+
+            font-size: 9px;
+            color: #76543c;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cart-item-price {
+            margin-top: 2px;
+
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        .cart-quantity {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .cart-quantity button {
+            width: 24px;
+            height: 24px;
+
+            border: none;
+            border-radius: 5px;
+
+            background: #a97856;
+            color: white;
+
+            font-size: 14px;
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        .cart-quantity button:hover {
+            background: #8b5e3c;
+        }
+
+        .cart-quantity span {
+            min-width: 16px;
+
+            text-align: center;
+
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .cart-item-total {
+            min-width: 45px;
+
+            text-align: right;
+
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        /* =========================
        MENU SECTION
     ========================= */
 
@@ -918,122 +1034,60 @@
                     '';
 
                 cartItems.innerHTML += `
-            <div style="
-                padding: 14px 0;
-                border-bottom: 1px solid #eee;
-            ">
+                    <div class="cart-item">
 
-                <div style="
-                    display: flex;
-                    justify-content: space-between;
-                    gap: 10px;
-                ">
+                        <div class="cart-item-image">
+                            IMAGE
+                        </div>
 
-                    <strong>
-                        ${item.name}
-                    </strong>
+                        <div class="cart-item-info">
 
-                    <strong>
-                        ₱${itemSubtotal.toFixed(2)}
-                    </strong>
-
-                </div>
-
-                ${
-                    optionText
-                        ? `
-                            <div style="
-                                margin-top: 6px;
-                                color: #8b6a50;
-                                font-size: 13px;
-                                font-weight: 600;
-                            ">
-                                ${optionText}
+                            <div class="cart-item-name">
+                                ${item.name}
                             </div>
-                        `
-                        : ''
-                }
 
-                <div style="
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    margin-top: 10px;
-                ">
+                            ${
+                                optionText
+                                    ? `
+                                        <div class="cart-item-options">
+                                            ${optionText}
+                                        </div>
+                                    `
+                                    : ''
+                            }
 
-                    <div style="
-                        display: flex;
-                        align-items: center;
-                        gap: 8px;
-                    ">
+                            <div class="cart-item-price">
+                                ₱${item.price.toFixed(2)} each
+                            </div>
 
-                        <button
-                            type="button"
-                            onclick="decreaseQuantity(${index})"
-                            style="
-                                width: 32px;
-                                height: 32px;
-                                border: 1px solid #ddd;
-                                background: white;
-                                border-radius: 6px;
-                                cursor: pointer;
-                                font-size: 18px;
-                            "
-                        >
-                            −
-                        </button>
+                        </div>
 
-                        <span style="
-                            min-width: 24px;
-                            text-align: center;
-                            font-weight: bold;
-                        ">
-                            ${item.quantity}
-                        </span>
+                        <div class="cart-quantity">
 
-                        <button
-                            type="button"
-                            onclick="increaseQuantity(${index})"
-                            style="
-                                width: 32px;
-                                height: 32px;
-                                border: 1px solid #ddd;
-                                background: white;
-                                border-radius: 6px;
-                                cursor: pointer;
-                                font-size: 18px;
-                            "
-                        >
-                            +
-                        </button>
+                            <button
+                                type="button"
+                                onclick="decreaseQuantity(${index})">
+                                −
+                            </button>
+
+                            <span>
+                                ${item.quantity}
+                            </span>
+
+                            <button
+                                type="button"
+                                onclick="increaseQuantity(${index})">
+                                +
+                            </button>
+
+                        </div>
+
+                        <div class="cart-item-total">
+                            ₱${itemSubtotal.toFixed(2)}
+                        </div>
 
                     </div>
-
-                    <button
-                        type="button"
-                        onclick="removeCartItem(${index})"
-                        style="
-                            border: none;
-                            background: none;
-                            color: #c00;
-                            cursor: pointer;
-                        "
-                    >
-                        Remove
-                    </button>
-
-                </div>
-
-                <div style="
-                    margin-top: 6px;
-                    color: #777;
-                    font-size: 13px;
-                ">
-                    ₱${item.price.toFixed(2)} each
-                </div>
-
-            </div>
-        `;
+                `;
 
             });
 
