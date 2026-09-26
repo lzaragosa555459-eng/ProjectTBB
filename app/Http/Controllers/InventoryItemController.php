@@ -2,17 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Inventory_Item;
 use Illuminate\Http\Request;
+use App\Models\Inventory_Item;
 
 class InventoryItemController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $items = Inventory_Item::with([
+            'unit',
+            'inventoryStocks.location',
+        ])
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return view('inventory.index', compact('items'));
     }
 
     /**

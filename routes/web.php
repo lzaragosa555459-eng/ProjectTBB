@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\POSController;
+use App\Http\Controllers\InventoryItemController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -44,5 +45,7 @@ Route::post(
 
 Route::get('/pos', [POSController::class, 'index'])->middleware('auth');
 
+Route::get('/inventory', [InventoryItemController::class, 'index'])
+    ->name('inventory.index');
 
 require __DIR__ . '/auth.php';

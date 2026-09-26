@@ -12,6 +12,6 @@ class Inventory_Locations extends Model
 
     public function inventoryStocks(): HasMany
     {
-        return $this->hasMany(Inventory_Stock::class);
+        return $this->hasMany(Inventory_Stock::class, 'location_id');
     }
 }

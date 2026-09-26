@@ -28,7 +28,7 @@ class Inventory_Item extends Model
 
     public function inventoryStocks(): HasMany
     {
-        return $this->hasMany(Inventory_Stock::class);
+        return $this->hasMany(Inventory_Stock::class, 'inventory_item_id');
     }
 
     public function recipeItems(): HasMany

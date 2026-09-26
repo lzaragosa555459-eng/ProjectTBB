@@ -23,16 +23,16 @@ class Inventory_Stock extends Model
 
     public function inventoryItem(): BelongsTo
     {
-        return $this->belongsTo(Inventory_Item::class);
+        return $this->belongsTo(Inventory_Item::class, 'inventory_item_id');
     }
 
     public function location(): BelongsTo
     {
-        return $this->belongsTo(Inventory_Locations::class);
+        return $this->belongsTo(Inventory_Locations::class, 'location_id');
     }
 
     public function inventoryTransactions(): HasMany
     {
-        return $this->hasMany(Inventory_Transactions::class);
+        return $this->hasMany(Inventory_Transactions::class, 'inventory_stock_id');
     }
 }

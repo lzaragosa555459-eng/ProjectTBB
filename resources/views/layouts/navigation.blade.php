@@ -65,8 +65,8 @@
 
 
         <a
-            href="#"
-            class="sidebar-link disabled">
+            href="/inventory"
+            class="sidebar-link {{ request()->is('inventory*') ? 'active' : '' }}">
             <span>→</span>
             <span>Inventory</span>
         </a>
