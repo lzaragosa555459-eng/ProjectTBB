@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\POSController;
 use App\Http\Controllers\InventoryItemController;
+use App\Http\Controllers\RecipeItemsController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -53,4 +54,13 @@ Route::post(
 )
     ->middleware('auth')
     ->name('inventory.toggle-active');
+
+Route::get('/recipe-management', [RecipeItemsController::class, 'index'])
+    ->name('recipe-management.index');
+
+Route::post('/recipe-management', [RecipeItemsController::class, 'store'])
+    ->name('recipe-management.store');
+
+
+
 require __DIR__ . '/auth.php';

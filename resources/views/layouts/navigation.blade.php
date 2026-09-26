@@ -71,6 +71,13 @@
             <span>Inventory</span>
         </a>
 
+        <a
+            href="/recipe-management"
+            class="sidebar-link {{ request()->is('recipe*') ? 'active' : '' }}">
+            <span>→</span>
+            <span>Manage Recipe</span>
+        </a>
+
     </div>
 
 

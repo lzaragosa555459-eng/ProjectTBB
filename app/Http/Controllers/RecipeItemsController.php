@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Recipe_Items;
 use Illuminate\Http\Request;
+use App\Models\Menu_Items;
+use App\Models\Inventory_Item;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class RecipeItemsController extends Controller
 {
@@ -12,7 +16,21 @@ class RecipeItemsController extends Controller
      */
     public function index()
     {
-        //
+        $menuItems = Menu_Items::with([
+            'recipeItems.inventoryItem.unit',
+        ])
+            ->orderBy('name')
+            ->get();
+
+        $inventoryItems = Inventory_Item::with('unit')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return view('recipe-management.index', compact(
+            'menuItems',
+            'inventoryItems'
+        ));
     }
 
     /**
@@ -28,7 +46,37 @@ class RecipeItemsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'menu_item_id' => ['required', 'exists:menu_items,id'],
+            'ingredients' => ['required', 'array', 'min:1'],
+            'ingredients.*.inventory_item_id' => [
+                'required',
+                'integer',
+                Rule::exists('inventory_items', 'id')->where('is_active', true),
+            ],
+            'ingredients.*.quantity_required' => [
+                'required',
+                'numeric',
+                'gt:0',
+            ],
+        ]);
+
+        DB::transaction(function () use ($validated) {
+            Recipe_Items::where('menu_item_id', $validated['menu_item_id'])
+                ->delete();
+
+            foreach ($validated['ingredients'] as $ingredient) {
+                Recipe_Items::create([
+                    'menu_item_id' => $validated['menu_item_id'],
+                    'inventory_item_id' => $ingredient['inventory_item_id'],
+                    'quantity_required' => $ingredient['quantity_required'],
+                ]);
+            }
+        });
+
+        return redirect()
+            ->route('recipe-management.index')
+            ->with('success', 'Recipe saved successfully.');
     }
 
     /**
