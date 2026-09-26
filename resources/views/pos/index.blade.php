@@ -672,6 +672,35 @@
             color: #b9a18c;
             cursor: default;
         }
+
+        .menu-stock-status {
+            display: inline-block;
+            margin-top: 7px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .menu-stock-status.available {
+            background: #eaf5ed;
+            color: #287344;
+        }
+
+        .menu-stock-status.low {
+            background: #fff0d6;
+            color: #96600b;
+        }
+
+        .menu-stock-status.out {
+            background: #fce8e6;
+            color: #b3261e;
+        }
+
+        .menu-stock-status.not-set {
+            background: #eee9e4;
+            color: #75645a;
+        }
     </style>
 
     <div class="pos-container">
@@ -722,7 +751,32 @@
 
                 @foreach ($menuItems as $menuItem)
 
-                <div
+                @php
+                $stockStatus = 'In Stock';
+
+                if ($menuItem->recipeItems->isEmpty()) {
+                $stockStatus = 'Stock Not Set';
+                } else {
+                foreach ($menuItem->recipeItems as $recipeItem) {
+                $stockRows = $recipeItem->inventoryItem?->inventoryStocks ?? collect();
+
+                $availableQuantity = (float) $stockRows->sum('current_quantity');
+                $reorderLevel = (float) $stockRows->sum('reorder_level');
+                $requiredQuantity = (float) $recipeItem->quantity_required;
+
+                if ($stockRows->isEmpty() || $availableQuantity < $requiredQuantity) {
+                    $stockStatus='Out of Stock' ;
+                    break;
+                    }
+
+                    if ($availableQuantity <=$reorderLevel) {
+                    $stockStatus='Low Stock' ;
+                    }
+                    }
+                    }
+                    @endphp
+
+                    <div
                     class="menu-card"
                     data-category="{{ $menuItem->category->name }}"
                     onclick="this.querySelector('.add-to-cart').click()">
@@ -740,7 +794,13 @@
                     <div class="menu-card-category">
                         {{ $menuItem->category->name ?? 'Menu Item' }}
                     </div>
-
+                    <div class="menu-stock-status
+                            {{ $stockStatus === 'In Stock' ? 'available' : '' }}
+                            {{ $stockStatus === 'Low Stock' ? 'low' : '' }}
+                            {{ $stockStatus === 'Out of Stock' ? 'out' : '' }}
+                            {{ $stockStatus === 'Stock Not Set' ? 'not-set' : '' }}">
+                        {{ $stockStatus }}
+                    </div>
                     <div class="price">
                         ₱{{ number_format($menuItem->base_price, 2) }}
                     </div>
@@ -755,104 +815,104 @@
                         Add to Order
                     </button>
 
-                </div>
-
-                @endforeach
-
-            </div>
-            @if ($menuItems->hasPages())
-            <div class="pos-pagination">
-
-                @if ($menuItems->onFirstPage())
-                <span class="pagination-disabled">←</span>
-                @else
-                <a href="{{ $menuItems->previousPageUrl() }}">←</a>
-                @endif
-
-                @foreach ($menuItems->getUrlRange(1, $menuItems->lastPage()) as $page => $url)
-
-                @if ($page == $menuItems->currentPage())
-                <span class="pagination-active">
-                    {{ $page }}
-                </span>
-                @else
-                <a href="{{ $url }}">
-                    {{ $page }}
-                </a>
-                @endif
-
-                @endforeach
-
-                @if ($menuItems->hasMorePages())
-                <a href="{{ $menuItems->nextPageUrl() }}">→</a>
-                @else
-                <span class="pagination-disabled">→</span>
-                @endif
-
-            </div>
-            @endif
-
-        </section>
-
-        <!-- CART -->
-        <section class="cart-section">
-
-            <h2>Current Order</h2>
-
-            <div
-                class="cart-items"
-                id="cartItems">
-                <div class="empty-cart">
-                    No items added.
-                </div>
             </div>
 
-            <div class="cart-summary">
+            @endforeach
 
-                <div class="summary-row">
-                    <span>Subtotal</span>
-                    <span id="subtotal">₱0.00</span>
-                </div>
+    </div>
+    @if ($menuItems->hasPages())
+    <div class="pos-pagination">
 
-                <div class="summary-row">
-                    <span>Discount</span>
-                    <span id="discount">₱0.00</span>
-                </div>
+        @if ($menuItems->onFirstPage())
+        <span class="pagination-disabled">←</span>
+        @else
+        <a href="{{ $menuItems->previousPageUrl() }}">←</a>
+        @endif
 
-                <div class="discount-buttons">
+        @foreach ($menuItems->getUrlRange(1, $menuItems->lastPage()) as $page => $url)
 
-                    <button
-                        type="button"
-                        id="noDiscountButton"
-                        class="discount-button active"
-                        onclick="selectDiscount('None')">
-                        No Discount
-                    </button>
+        @if ($page == $menuItems->currentPage())
+        <span class="pagination-active">
+            {{ $page }}
+        </span>
+        @else
+        <a href="{{ $url }}">
+            {{ $page }}
+        </a>
+        @endif
 
-                    <button
-                        type="button"
-                        id="seniorPwdButton"
-                        class="discount-button"
-                        onclick="selectDiscount('Senior/PWD')">
-                        Senior/PWD
-                    </button>
+        @endforeach
 
-                </div>
+        @if ($menuItems->hasMorePages())
+        <a href="{{ $menuItems->nextPageUrl() }}">→</a>
+        @else
+        <span class="pagination-disabled">→</span>
+        @endif
 
-                <div class="summary-row total">
-                    <span>Total</span>
-                    <span id="total">₱0.00</span>
-                </div>
+    </div>
+    @endif
+
+    </section>
+
+    <!-- CART -->
+    <section class="cart-section">
+
+        <h2>Current Order</h2>
+
+        <div
+            class="cart-items"
+            id="cartItems">
+            <div class="empty-cart">
+                No items added.
+            </div>
+        </div>
+
+        <div class="cart-summary">
+
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <span id="subtotal">₱0.00</span>
+            </div>
+
+            <div class="summary-row">
+                <span>Discount</span>
+                <span id="discount">₱0.00</span>
+            </div>
+
+            <div class="discount-buttons">
+
                 <button
                     type="button"
-                    class="checkout-button"
-                    onclick="openCheckoutModal()">
-                    Checkout
+                    id="noDiscountButton"
+                    class="discount-button active"
+                    onclick="selectDiscount('None')">
+                    No Discount
+                </button>
+
+                <button
+                    type="button"
+                    id="seniorPwdButton"
+                    class="discount-button"
+                    onclick="selectDiscount('Senior/PWD')">
+                    Senior/PWD
                 </button>
 
             </div>
 
-        </section>
+            <div class="summary-row total">
+                <span>Total</span>
+                <span id="total">₱0.00</span>
+            </div>
+            <button
+                type="button"
+                class="checkout-button"
+                onclick="openCheckoutModal()">
+                Checkout
+            </button>
+
+        </div>
+
+    </section>
 
     </div>
     <div id="optionModal" class="option-modal">
