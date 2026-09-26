@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
+use App\Models\Inventory_Item;
 
 class InventoryService
 {
@@ -80,6 +81,19 @@ class InventoryService
         User $user,
         Order $order
     ): void {
+        $inventoryItem = Inventory_Item::where(
+            'id',
+            $inventoryItemId
+        )
+            ->lockForUpdate()
+            ->first();
+
+        if (!$inventoryItem || !$inventoryItem->is_active) {
+            throw new RuntimeException(
+                'This inventory item is inactive and cannot be used for orders.'
+            );
+        }
+
         $stock = Inventory_Stock::where(
             'inventory_item_id',
             $inventoryItemId

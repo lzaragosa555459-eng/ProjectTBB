@@ -10,17 +10,19 @@
         <div class="inventory-summary">
             <div class="inventory-summary-card">
                 <span class="summary-label">Active Items</span>
-                <strong>{{ $items->count() }}</strong>
+                <strong>{{ $activeItemCount }}</strong>
             </div>
 
             <div class="inventory-summary-card">
                 <span class="summary-label">Low Stock Records</span>
-                <strong>
-                    {{ $items->sum(fn ($item) => $item->inventoryStocks->filter(fn ($stock) => $stock->current_quantity <= $stock->reorder_level)->count()) }}
-                </strong>
+                <strong>{{ $lowStockCount }}</strong>
             </div>
         </div>
-
+        @if (session('success'))
+        <div class="inventory-alert">
+            {{ session('success') }}
+        </div>
+        @endif
         <section class="inventory-section">
             <div class="section-heading">
                 <h2>Inventory Items</h2>
@@ -37,7 +39,9 @@
                             <th>Location</th>
                             <th>Current Stock</th>
                             <th>Reorder Level</th>
-                            <th>Status</th>
+                            <th>Stock Status</th>
+                            <th>Item Status</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
 
@@ -58,6 +62,31 @@
                                     <span class="stock-status okay">In Stock</span>
                                     @endif
                             </td>
+
+                            @if ($loop->first)
+                            <td rowspan="{{ $item->inventoryStocks->count() }}">
+                                @if ($item->is_active)
+                                <span class="item-status active">Active</span>
+                                @else
+                                <span class="item-status inactive">Inactive</span>
+                                @endif
+                            </td>
+
+                            <td rowspan="{{ $item->inventoryStocks->count() }}">
+                                <form
+                                    method="POST"
+                                    action="{{ route('inventory.toggle-active', $item) }}"
+                                    onsubmit="return confirm('Are you sure you want to {{ $item->is_active ? 'deactivate' : 'activate' }} this inventory item?');">
+                                    @csrf
+
+                                    <button
+                                        type="submit"
+                                        class="toggle-button {{ $item->is_active ? 'deactivate' : 'activate' }}">
+                                        {{ $item->is_active ? 'Deactivate' : 'Activate' }}
+                                    </button>
+                                </form>
+                            </td>
+                            @endif
                         </tr>
                         @empty
                         <tr>
@@ -65,22 +94,97 @@
                             <td>{{ $item->inventory_type }}</td>
                             <td>{{ $item->unit?->abbreviation ?? '—' }}</td>
                             <td colspan="4">No stock record yet</td>
+                            <td>
+                                @if ($item->is_active)
+                                <span class="item-status active">Active</span>
+                                @else
+                                <span class="item-status inactive">Inactive</span>
+                                @endif
+                            </td>
+                            <td>
+                                <form
+                                    method="POST"
+                                    action="{{ route('inventory.toggle-active', $item) }}"
+                                    onsubmit="return confirm('Are you sure you want to {{ $item->is_active ? 'deactivate' : 'activate' }} this inventory item?');">
+                                    @csrf
+
+                                    <button
+                                        type="submit"
+                                        class="toggle-button {{ $item->is_active ? 'deactivate' : 'activate' }}">
+                                        {{ $item->is_active ? 'Deactivate' : 'Activate' }}
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
                         @endforelse
                         @empty
                         <tr>
-                            <td colspan="7" class="empty-state">
-                                No active inventory items found.
+                            <td colspan="9" class="empty-state">
+                                No inventory items found.
                             </td>
                         </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+            <div class="inventory-pagination">
+                {{ $items->links() }}
+            </div>
         </section>
     </div>
 
     <style>
+        .inventory-alert {
+            margin-bottom: 18px;
+            padding: 12px 16px;
+            border: 1px solid #b8dfc2;
+            border-radius: 8px;
+            background: #eaf5ed;
+            color: #287344;
+            font-size: 14px;
+        }
+
+        .item-status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .item-status.active {
+            background: #eaf5ed;
+            color: #287344;
+        }
+
+        .item-status.inactive {
+            background: #f1eeec;
+            color: #75645a;
+        }
+
+        .toggle-button {
+            padding: 7px 11px;
+            border: 0;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .toggle-button.deactivate {
+            background: #fff0e8;
+            color: #a84718;
+        }
+
+        .toggle-button.activate {
+            background: #eaf5ed;
+            color: #287344;
+        }
+
+        .inventory-pagination {
+            margin-top: 18px;
+        }
+
         .inventory-page {
             padding: 28px;
             color: #3f3028;

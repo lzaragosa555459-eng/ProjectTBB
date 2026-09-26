@@ -47,5 +47,10 @@ Route::get('/pos', [POSController::class, 'index'])->middleware('auth');
 
 Route::get('/inventory', [InventoryItemController::class, 'index'])
     ->name('inventory.index');
-
+Route::post(
+    '/inventory/{inventoryItem}/toggle-active',
+    [InventoryItemController::class, 'toggleActive']
+)
+    ->middleware('auth')
+    ->name('inventory.toggle-active');
 require __DIR__ . '/auth.php';

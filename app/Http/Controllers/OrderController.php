@@ -13,6 +13,7 @@ use App\Models\Payment;
 use App\Services\InventoryService;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
 {
@@ -45,7 +46,10 @@ class OrderController extends Controller
                 'order_type' => 'required|string|max:50',
                 'items' => 'required|array|min:1',
 
-                'items.*.menu_item_id' => 'required|exists:menu_items,id',
+                'items.*.menu_item_id' => [
+                    'required',
+                    Rule::exists('menu_items', 'id')->where('is_active', true),
+                ],
                 'items.*.quantity' => 'required|integer|min:1',
                 'items.*.notes' => 'nullable|string',
 
